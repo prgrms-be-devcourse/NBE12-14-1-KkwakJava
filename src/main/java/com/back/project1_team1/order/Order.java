@@ -13,9 +13,11 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
     private int id;
 
-    private String email; // 고객 이메일
+    private String email;
 
-    private LocalDateTime orderDate; // 주문 날짜 및 시각
+    // 주문 날짜 및 시각
+    // 클라이언트가 전달하지 않고 주문 생성 시 서버에서 자동으로 생성
+    private LocalDateTime orderDate;
 
     @OneToMany
     private List<OrderItem> orderItems; // 주문 상품 목록
