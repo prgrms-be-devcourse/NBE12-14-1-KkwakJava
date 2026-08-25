@@ -1,8 +1,12 @@
 package com.back.project1_team1.product;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "products")
