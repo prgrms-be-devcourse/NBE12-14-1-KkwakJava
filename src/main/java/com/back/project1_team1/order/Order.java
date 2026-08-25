@@ -1,19 +1,24 @@
 package com.back.project1_team1.order;
 
+import com.back.project1_team1.product.Product;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "orders")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
     @Id // 주문 테이블의 기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
-    private int id;
+    private Long id;
 
     private String email;
 
@@ -25,5 +30,17 @@ public class Order {
     // 부모 저장/삭제 시 자식 자동 반영(cascade) 및 부모와 연결 끊긴 자식 자동 삭제(orphanRemoval)
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST,
         CascadeType.REMOVE}, orphanRemoval = true)
-    private List<OrderItem> orderItems; // 주문 상품 목록
+    private List<OrderItem> orderItems = new ArrayList<>(); // 주문 상품 목록
+
+    public Order(String email, LocalDateTime orderDate) {
+        this.email = email;
+        this.orderDate = orderDate;
+    }
+
+    // 연관관계 편의 메서드 (Order와 OrderItem을 동시에 연결)
+    public void addOrderItem(Product product, int quantity) {
+        OrderItem item = new OrderItem(this, product, quantity);
+        this.orderItems.add(item);
+    }
+
 }
