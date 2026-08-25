@@ -4,16 +4,19 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "orders")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
     @Id // 주문 테이블의 기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
-    private int id;
+    private Long id;
 
     private String email;
 
@@ -26,4 +29,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST,
         CascadeType.REMOVE}, orphanRemoval = true)
     private List<OrderItem> orderItems; // 주문 상품 목록
+
+    public Order(String email, LocalDateTime orderDate) {
+        this.email = email;
+        this.orderDate = orderDate;
+    }
 }

@@ -1,22 +1,23 @@
 package com.back.project1_team1.order;
 
-import org.osgi.annotation.versioning.ProviderType;
+import com.back.project1_team1.order.dto.OrderCreateRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
-
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
 
     @GetMapping
     public String orderList(Model model) {
@@ -40,4 +41,11 @@ public class OrderController {
 
     }
 
+    // 주문 생성 API
+    // 클라이언트의 주문 요청을 받아 OrderService에 전달
+    @PostMapping
+    @ResponseBody
+    public void createOrder(@RequestBody OrderCreateRequest request) {
+        orderService.createOrder(request); // 주문 생성 요청
+    }
 }

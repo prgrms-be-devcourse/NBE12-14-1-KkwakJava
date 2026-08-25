@@ -10,7 +10,7 @@ public class Product {
 
     @Id // 상품 테이블의 기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
-    private int id;
+    private Long id;
 
     private String name; // 상품명
 
