@@ -31,6 +31,8 @@ class DeleteTest {
     void setUp() {
         Order order = new Order(
             "test@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
             LocalDateTime.now()
         );
 

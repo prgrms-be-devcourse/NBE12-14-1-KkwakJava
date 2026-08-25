@@ -10,7 +10,9 @@ import java.util.List;
  */
 
 public record OrderCreateRequest(
-    String email, // 고객 이메일
+    String email,
+    String postalCode,
+    String address,
     List<OrderItemRequest> items // 한 건의 주문에 포함된 상품 목록
 ) {
 

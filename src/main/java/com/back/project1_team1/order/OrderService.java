@@ -52,6 +52,8 @@ public class OrderService {
         // 현재 서버 시각 저장
         Order order = new Order(
             request.email(),
+            request.postalCode(),
+            request.address(),
             LocalDateTime.now()
         );
 
@@ -63,19 +65,23 @@ public class OrderService {
             // productId에 해당하는 상품 조회
             Product product = productRepository
                 .findById(itemRequest.productId())
-                .orElseThrow();
+                .orElseThrow(() ->
+                    new IllegalArgumentException(
+                        "존재하지 않는 상품입니다. id = " + itemRequest.productId()
+                    )
+                );
 
-            // 주문, 상품, 수량을 연결하여 주문 상품 생성
-            OrderItem orderItem = new OrderItem(
-                order,
+            // Order 내부에서 OrderItem 생성 + 연관관계 연결
+            order.addOrderItem(
                 product,
                 itemRequest.quantity()
             );
-
-            orderItemRepository.save(orderItem); // DB에 주문 상품 저장 요청
         }
+
+        orderRepository.save(order);
     }
 
+    /*
     // 주문 삭제
     @Transactional
     public List<Order> findAll() {
@@ -85,6 +91,21 @@ public class OrderService {
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. id = " + orderId));
+
+        orderRepository.delete(order);
+    }
+
+     */
+
+    // 주문 삭제
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() ->
+                new IllegalArgumentException(
+                    "존재하지 않는 주문입니다. id = " + orderId
+                )
+            );
 
         orderRepository.delete(order);
     }

@@ -22,6 +22,9 @@ public class Order {
 
     private String email;
 
+    private String postalCode; // 우편번호
+    private String address; // 주소
+
     // 주문 날짜 및 시각
     // 클라이언트가 전달하지 않고 주문 생성 시 서버에서 자동으로 생성
     private LocalDateTime orderDate;
@@ -34,8 +37,15 @@ public class Order {
     private List<OrderItem> orderItems = new ArrayList<>(); // 주문 상품 목록
 
 
-    public Order(String email, LocalDateTime orderDate) {
+    public Order(
+        String email,
+        String postalCode,
+        String address,
+        LocalDateTime orderDate
+    ) {
         this.email = email;
+        this.postalCode = postalCode;
+        this.address = address;
         this.orderDate = orderDate;
     }
 

@@ -18,9 +18,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 public class OrderCreateTest {
 
     @Autowired
@@ -55,7 +57,9 @@ public class OrderCreateTest {
     void createOrder_success(){
 
         OrderCreateRequest request = new OrderCreateRequest(
-            "aaa@test.com",
+            "test@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
             List.of(
                 new OrderItemRequest(product1.getId(), 2),
                 new OrderItemRequest(product2.getId(), 1)
@@ -72,7 +76,7 @@ public class OrderCreateTest {
 
         Order savedOrder = orders.get(0);
 
-        assertThat(savedOrder.getEmail()).isEqualTo("aaa@test.com");
+        assertThat(savedOrder.getEmail()).isEqualTo("test@test.com");
         assertThat(savedOrder.getOrderDate()).isNotNull();
     }
 }
