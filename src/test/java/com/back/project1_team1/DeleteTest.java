@@ -29,10 +29,7 @@ class DeleteTest {
 
     @BeforeEach
     void setUp() {
-        Order order = new Order();
-        order.setEmail("test@test.com");
-        order.setOrderDate(LocalDateTime.now());
-
+        Order order = new Order("test@test.com", LocalDateTime.now());
         savedOrder = orderRepository.save(order);
     }
 
@@ -40,7 +37,7 @@ class DeleteTest {
     @DisplayName("존재하는 주문을 삭제하면 DB에서 사라진다")
     @Transactional
     void deleteOrder_success() {
-        int orderId = savedOrder.getId();
+        Long orderId = savedOrder.getId();
 
         orderService.deleteOrder(orderId);
 
@@ -50,7 +47,7 @@ class DeleteTest {
     @Test
     @DisplayName("존재하지 않는 id로 삭제 시도하면 예외가 발생한다")
     void deleteOrder_notFound_throwsException() {
-        int notExistId = 999999;
+        Long notExistId = 999999L;
 
         assertThatThrownBy(() -> orderService.deleteOrder(notExistId))
             .isInstanceOf(IllegalArgumentException.class)

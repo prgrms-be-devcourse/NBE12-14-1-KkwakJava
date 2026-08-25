@@ -1,9 +1,11 @@
 package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.OrderCreateRequest;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,34 +13,29 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-@RequestMapping("/orders")
+@RestController
+@RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
 
     @GetMapping
-    public String orderList(Model model) {
-        model.addAttribute("orders", orderService.findAll());
-        return "order/list"; // templates/order/list.html
+    public List<Order> orderList() {
+        return orderService.findAll();
     }
 
     @DeleteMapping("/{orderId}")
-   public String deleteOrder(
-       @PathVariable Integer orderId,
-        Model model
-    ){
-        try{
+    public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
+        try {
             orderService.deleteOrder(orderId);
-        }catch (IllegalArgumentException e){
-            model.addAttribute("error", "존재하지 않는 주문입니다");
-        }catch (IllegalStateException e){
-            model.addAttribute("error", e.getMessage());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "존재하지 않는 주문입니다."));
         }
-            return "redirect:/orders"; //삭제 후 목록으로 이동
-
     }
 
     // 주문 생성 API
