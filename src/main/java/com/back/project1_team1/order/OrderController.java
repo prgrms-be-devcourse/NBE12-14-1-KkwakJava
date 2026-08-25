@@ -27,7 +27,7 @@ public class OrderController {
 
     @DeleteMapping("/{orderId}")
    public String deleteOrder(
-       @PathVariable Integer orderId,
+       @PathVariable Long orderId,
         Model model
     ){
         try{

@@ -54,7 +54,7 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public void deleteOrder(int orderId) {
+    public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다,. id = " + orderId));
 
