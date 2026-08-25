@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Getter;
 
 @Entity
 @Table(name = "orders")
+@Getter
 public class Order {
 
     @Id // 주문 테이블의 기본키
