@@ -20,7 +20,7 @@ public class Product {
 
     private int price; // 상품 가격
 
-    public Product(String name, int price){
+    public Product(String name, int price) {
         this.name = name;
         this.price = price;
     }
