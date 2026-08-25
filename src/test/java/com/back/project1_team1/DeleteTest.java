@@ -29,7 +29,11 @@ class DeleteTest {
 
     @BeforeEach
     void setUp() {
-        Order order = new Order("test@test.com", LocalDateTime.now());
+        Order order = new Order(
+            "test@test.com",
+            LocalDateTime.now()
+        );
+
         savedOrder = orderRepository.save(order);
     }
 
