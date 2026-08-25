@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/orders")
@@ -44,6 +45,7 @@ public class OrderController {
     // 주문 생성 API
     // 클라이언트의 주문 요청을 받아 OrderService에 전달
     @PostMapping
+    @ResponseBody
     public void createOrder(@RequestBody OrderCreateRequest request) {
         orderService.createOrder(request); // 주문 생성 요청
     }
