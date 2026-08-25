@@ -1,6 +1,8 @@
 spring:
   application:
     name: project1_team1
+  profiles:
+    active: dev
 
   output:
     ansi:
@@ -16,6 +18,8 @@ spring:
       ddl-auto: update
     show-sql: true
 
+springdoc:
+  default-produces-media-type: application/json
 
 logging:
   level:
