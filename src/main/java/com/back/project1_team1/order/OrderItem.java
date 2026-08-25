@@ -11,7 +11,7 @@ public class OrderItem {
 
     @Id // 주문 상품 테이블의 기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
-    private int id;
+    private Long id;
 
     // 지연로딩 설정
     @ManyToOne(fetch = FetchType.LAZY)

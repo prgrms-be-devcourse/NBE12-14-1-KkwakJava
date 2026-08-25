@@ -13,7 +13,7 @@ public class Order {
 
     @Id // 주문 테이블의 기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
-    private int id;
+    private Long id;
 
     private String email;
 
