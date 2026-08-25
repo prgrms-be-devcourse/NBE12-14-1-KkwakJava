@@ -2,11 +2,14 @@ package com.back.project1_team1.order;
 
 import com.back.project1_team1.product.Product;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "order_items")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
 
     @Id // 주문 상품 테이블의 기본키
@@ -23,4 +26,10 @@ public class OrderItem {
     private Product product; // 상품 테이블 객체
 
     private int quantity; // 해당 주문 상품 수량
+
+    public OrderItem(Order order, Product product, int quantity) {
+        this.order = order;
+        this.product = product;
+        this.quantity = quantity;
+    }
 }
