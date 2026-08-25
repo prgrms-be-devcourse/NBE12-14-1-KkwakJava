@@ -30,12 +30,15 @@ public class Order {
     // 부모 저장/삭제 시 자식 자동 반영(cascade) 및 부모와 연결 끊긴 자식 자동 삭제(orphanRemoval)
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST,
         CascadeType.REMOVE}, orphanRemoval = true)
+
     private List<OrderItem> orderItems = new ArrayList<>(); // 주문 상품 목록
+
 
     public Order(String email, LocalDateTime orderDate) {
         this.email = email;
         this.orderDate = orderDate;
     }
+
 
     // 연관관계 편의 메서드 (Order와 OrderItem을 동시에 연결)
     public void addOrderItem(Product product, int quantity) {
