@@ -18,8 +18,14 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @GetMapping
+    public String orderList(Model model) {
+        model.addAttribute("orders", orderService.findAll());
+        return "order/list"; // templates/order/list.html
+    }
+
     @DeleteMapping("/{orderId}")
-   public void deleteOrder(
+   public String deleteOrder(
        @PathVariable Integer orderId,
         Model model
     ){
