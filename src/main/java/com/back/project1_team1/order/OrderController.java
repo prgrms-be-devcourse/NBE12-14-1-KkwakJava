@@ -39,22 +39,6 @@ public class OrderController {
         return this.orderService.findAll();
     }
 
-    // 주문 삭제
-    @DeleteMapping("/{orderId}")
-    public String deleteOrder(
-        @PathVariable Long orderId,
-        Model model
-    ) {
-        try {
-            orderService.deleteOrder(orderId);
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", "존재하지 않는 주문입니다");
-        } catch (IllegalStateException e) {
-            model.addAttribute("error", e.getMessage());
-        }
-        return "redirect:/orders"; // 삭제 후 목록으로 이동
-    }
-
     // 주문 생성 API
     // 클라이언트의 주문 요청을 받아 OrderService에 전달
     @PostMapping
@@ -63,11 +47,6 @@ public class OrderController {
         orderService.createOrder(request); // 주문 생성 요청
     }
 
-
-    @GetMapping
-    public List<OrderResponse> orderList() {
-        return orderService.findAll();
-    }
 
     //단건 삭제
     @DeleteMapping("/{orderId}")
@@ -83,7 +62,8 @@ public class OrderController {
 
     //다건삭제
     @DeleteMapping
-    public ResponseEntity<?> deleteOrders(@RequestParam List<Long> orderIds) {
+    public ResponseEntity<?> deleteOrders(
+        @RequestParam List<Long> orderIds) {
 
        try {
            orderService.deleteOrders(orderIds);
