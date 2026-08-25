@@ -5,8 +5,10 @@ package com.back.project1_team1.order.dto;
     상품 ID와 주문 수량을 전달받음
  */
 
-public class OrderItemRequest {
+public record OrderItemRequest(
+    Long productId, // 주문할 상품의 ID
+    int quantity // 주문할 상품의 수량
+) {
 
-    private int productId; // 주문할 상품의 ID
-    private int quantity; // 주문할 상품의 수량
+
 }

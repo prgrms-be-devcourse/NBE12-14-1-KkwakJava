@@ -3,11 +3,12 @@ package com.back.project1_team1.product;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 
-@Getter
-@NoArgsConstructor
 @Entity
 @Table(name = "products")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
 
     @Id // 상품 테이블의 기본키
