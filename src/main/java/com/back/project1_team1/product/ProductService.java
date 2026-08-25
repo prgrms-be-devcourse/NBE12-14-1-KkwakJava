@@ -4,6 +4,7 @@ import com.back.project1_team1.product.dto.ProductCreateRequest;
 import com.back.project1_team1.product.dto.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,35 +15,40 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public Product createProduct(ProductCreateRequest request)  {
+    // 상품 등록
+    public Product createProduct(ProductCreateRequest request) {
 
         Product product = new Product(
                 request.name(),
                 request.price()
         );
 
-        return  productRepository.save(product);
+        return productRepository.save(product);
     }
 
-    public List<Product> getProducts()   {
+    // 상품 전체 조회
+    public List<Product> getProducts() {
         return productRepository.findAll();
     }
 
-    public Product getProduct(int id) {
+    // 상품 단건 조회
+    public Product getProduct(Long id) {
         return productRepository.findById(id).get();
     }
 
-    public Product updateProduct(int id, ProductUpdateRequest request)   {
+    // 상품 수정
+    @Transactional
+    public Product updateProduct(Long id, ProductUpdateRequest request) {
 
         Product product = productRepository.findById(id).get();
 
-        product.setName(request.name());
-        product.setPrice(request.price());
+        product.update(request.name(), request.price());
 
         return product;
     }
 
-    public void deleteProduct(int id)   {
+    // 상품 삭제
+    public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
 
