@@ -1,17 +1,20 @@
 package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.OrderCreateRequest;
+import com.back.project1_team1.product.ProductRepository;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,12 +24,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderItemRepository orderItemRepository;
+    private final ProductRepository productRepository;
+
+    // 주문 생성 API
+    // 클라이언트의 주문 요청을 받아 OrderService에 전달
+    @PostMapping
+    @ResponseBody
+    public void createOrder(@RequestBody OrderCreateRequest request) {
+        orderService.createOrder(request); // 주문 생성 요청
+    }
+
 
     @GetMapping
     public List<Order> orderList() {
         return orderService.findAll();
     }
 
+    //단건 삭제
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
         try {
@@ -38,11 +53,19 @@ public class OrderController {
         }
     }
 
-    // 주문 생성 API
-    // 클라이언트의 주문 요청을 받아 OrderService에 전달
-    @PostMapping
-    @ResponseBody
-    public void createOrder(@RequestBody OrderCreateRequest request) {
-        orderService.createOrder(request); // 주문 생성 요청
+    //다건삭제
+    @DeleteMapping
+    public ResponseEntity<?> deleteOrders(@RequestParam List<Long> orderIds) {
+
+       try {
+           orderService.deleteOrders(orderIds);
+           return ResponseEntity.noContent().build();
+       }catch(IllegalArgumentException e) {
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+               .body(Map.of("message", e.getMessage()));
+        }
     }
+
+
+
 }

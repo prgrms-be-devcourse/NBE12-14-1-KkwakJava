@@ -54,10 +54,28 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    //단건 삭제
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. id=" + orderId));
 
         orderRepository.delete(order);
     }
+
+    @Transactional
+    public void deleteOrders(List<Long> orderIds) {
+        if(orderIds == null || orderIds.isEmpty()) {
+            throw new IllegalArgumentException("삭제할 주문을 선택하세요");
+        }
+
+        List<Order> orders = orderRepository.findAllById(orderIds);
+
+        if(orders.size() != orderIds.size()) {
+            throw new IllegalArgumentException("존재하지 않는 주문이 포함되어 있습니다");
+        }
+
+        orderRepository.deleteAll(orders);
+    }
+
+
 }
