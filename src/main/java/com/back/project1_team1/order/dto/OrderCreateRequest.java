@@ -9,9 +9,9 @@ import java.util.List;
     클라이언트에서는 고객 이메일, 상룸 목록만 전달
  */
 
-public class OrderCreateRequest {
+public record OrderCreateRequest(
+    String email, // 고객 이메일
+    List<OrderItemRequest> items // 한 건의 주문에 포함된 상품 목록
+) {
 
-    private String email; // 고객 이메일
-
-    private List<OrderItemRequest> items; // 한 건의 주문에 포함된 상품 목록
 }
