@@ -1,9 +1,11 @@
 package com.back.project1_team1.product;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
 @Table(name = "products")
+@Getter
 public class Product {
 
     @Id // 상품 테이블의 기본키
