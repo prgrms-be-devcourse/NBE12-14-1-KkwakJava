@@ -6,7 +6,7 @@ package com.back.project1_team1.order.dto;
  */
 
 public record OrderItemRequest(
-    int productId, // 주문할 상품의 ID
+    Long productId, // 주문할 상품의 ID
     int quantity // 주문할 상품의 수량
 ) {
 
