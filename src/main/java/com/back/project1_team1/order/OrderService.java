@@ -91,16 +91,14 @@ public class OrderService {
         // 배송 마감 여부 체크
         if (order.isAlreadyDelivered(LocalDateTime.now())) {
             throw new IllegalStateException("이미 배송된 주문이라 수정할 수 없습니다.");
-
         }
+
         // 배송지 수정
         order.updateDeliveryAddress(request.postalCode(), request.address());
 
         // 주문 상품 목록 갱신
-        // 기존 아이템 목록 초기화
         order.clearOrderItems();
 
-        //새로운 상품/수량 추가
         for (OrderItemRequest itemRequest : request.items()) {
             Product product = productRepository.findById(itemRequest.productId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -108,6 +106,9 @@ public class OrderService {
 
             order.addOrderItem(product, itemRequest.quantity());
         }
+
+        // 새 OrderItem의 ID를 생성하고 수정 내용을 DB에 즉시 반영한 후 응답하기 위해 flush
+        orderRepository.flush();
 
         return OrderResponse.from(order);
     }
