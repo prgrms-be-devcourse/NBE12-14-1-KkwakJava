@@ -7,11 +7,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     // 에러 응답용 표준 Record DTO
-    public record ErrorResponse(int status, String error, String message) {
+    public record ErrorResponse(int status, String error, Object message) {
     }
 
     // 400 BAD_REQUEST: DTO Validation(@Valid) 검증 실패
@@ -19,18 +21,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
         MethodArgumentNotValidException e) {
 
-        FieldError fieldError = e.getBindingResult().getFieldError();
-
-        String message = (fieldError != null)
-            ? fieldError.getDefaultMessage()
-            : "유효하지 않은 요청입니다.";
+        List<String> messages = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(FieldError::getDefaultMessage)
+                .toList();
 
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse(
                 400,
                 "BAD_REQUEST",
-                message
+                messages
             ));
     }
 
