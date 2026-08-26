@@ -1,6 +1,7 @@
 package com.back.project1_team1;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.back.project1_team1.order.Order;
 import com.back.project1_team1.order.OrderItem;
@@ -77,6 +78,36 @@ public class OrderCreateTest {
         Order savedOrder = orders.get(0);
 
         assertThat(savedOrder.getEmail()).isEqualTo("test@test.com");
+        assertThat(savedOrder.getPostalCode()).isEqualTo("12345");
+        assertThat(savedOrder.getAddress()).isEqualTo("서울시 강남구 테스트로 1");
         assertThat(savedOrder.getOrderDate()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 ID로 주문 생성 시 예외가 발생하고 주문은 저장되지 않는다")
+    void createOrder_invalidProduct_rollback() {
+
+        // given
+        long beforeOrderCount = orderRepository.count();
+        long beforeOrderItemCount = orderItemRepository.count();
+
+        OrderCreateRequest request = new OrderCreateRequest(
+            "invalid@test.com",
+            "12345",
+            "서울시 테스트구 테스트로 100",
+            List.of(
+                new OrderItemRequest(product1.getId(), 2),
+                new OrderItemRequest(999999L, 1)
+            )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(request))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("존재하지 않는 상품입니다");
+
+        // 주문과 주문상품이 추가되지 않았는지 확인
+        assertThat(orderRepository.count()).isEqualTo(beforeOrderCount);
+        assertThat(orderItemRepository.count()).isEqualTo(beforeOrderItemCount);
     }
 }
