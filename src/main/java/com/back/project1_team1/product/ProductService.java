@@ -11,11 +11,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository productRepository;
 
     // 상품 등록
+    @Transactional
     public Product createProduct(ProductCreateRequest request) {
 
         Product product = new Product(
@@ -33,14 +35,20 @@ public class ProductService {
 
     // 상품 단건 조회
     public Product getProduct(Long id) {
-        return productRepository.findById(id).get();
+        return productRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException( "존재하지 않는 상품입니다. id = " + id)
+                );
     }
 
     // 상품 수정
     @Transactional
     public Product updateProduct(Long id, ProductUpdateRequest request) {
 
-        Product product = productRepository.findById(id).get();
+        Product product = productRepository.findById(id)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException( "존재하지 않는 상품입니다. id = " + id)
+                        );
 
         product.update(request.name(), request.price());
 
@@ -48,7 +56,13 @@ public class ProductService {
     }
 
     // 상품 삭제
+    @Transactional
     public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("존재하지 않는 상품입니다. id = " + id)
+                );
+
         productRepository.deleteById(id);
     }
 

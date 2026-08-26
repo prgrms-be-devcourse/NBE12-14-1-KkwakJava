@@ -4,6 +4,7 @@ package com.back.project1_team1.product;
 import com.back.project1_team1.product.dto.ProductCreateRequest;
 import com.back.project1_team1.product.dto.ProductResponse;
 import com.back.project1_team1.product.dto.ProductUpdateRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class ProductController {
     // POST /products
     @PostMapping
     public ProductResponse createProduct(
-            @RequestBody ProductCreateRequest request
+            @Valid @RequestBody ProductCreateRequest request
     ) {
 
         Product product = productService.createProduct(request);
@@ -58,7 +59,7 @@ public class ProductController {
     @PutMapping("{id}")
     public ProductResponse updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductUpdateRequest request
+            @Valid @RequestBody ProductUpdateRequest request
     ) {
         Product product = productService.updateProduct(id, request);
 
