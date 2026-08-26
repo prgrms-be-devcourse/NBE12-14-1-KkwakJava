@@ -45,3 +45,6 @@ db_dev.trace.db
 
 
 src/main/resources/application-local.yml
+
+.DS_Store
+**/.DS_Store
