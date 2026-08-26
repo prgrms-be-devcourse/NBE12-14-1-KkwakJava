@@ -19,6 +19,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 주문일(orderDate)가 start (ex: 8/24 14:00) 이상,
     // end (ex: 8/25 14:00)미만인 주문 목록 조회
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.product"})
     List<Order> findByOrderDateGreaterThanEqualAndOrderDateLessThan(
         LocalDateTime start,
         LocalDateTime end

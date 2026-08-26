@@ -4,23 +4,28 @@ package com.back.project1_team1.order;
 import com.back.project1_team1.order.dto.DeliveryOrderResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DeliveryService {
+
+    private static final LocalTime DELIVERY_CUTOFF_TIME = LocalTime.of(14, 0);
 
     private final OrderRepository orderRepository;
 
     public List<DeliveryOrderResponse> getDeliveryOrders(LocalDate date) {
 
         // 조회 날짜(당일)의 14시를 종료 시간으로 설정
-        LocalDateTime end = date.atTime(14, 0);
+        LocalDateTime end = date.atTime(DELIVERY_CUTOFF_TIME);
 
         // 종료 시간 기준 하루 전(전날) 14시를 시작 시간으로 설정
         LocalDateTime start = end.minusDays(1);
