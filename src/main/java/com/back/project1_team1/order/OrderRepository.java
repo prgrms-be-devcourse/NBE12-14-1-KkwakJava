@@ -24,4 +24,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         LocalDateTime start,
         LocalDateTime end
     );
+
+    //
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.product"})
+    List<Order> findByEmailAndOrderDateGreaterThanEqualAndOrderDateLessThan(
+        String email,
+        LocalDateTime start,
+        LocalDateTime end
+    );
 }

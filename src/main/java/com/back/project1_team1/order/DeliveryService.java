@@ -1,6 +1,5 @@
 package com.back.project1_team1.order;
 
-
 import com.back.project1_team1.order.dto.DeliveryOrderResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,38 +22,59 @@ public class DeliveryService {
 
     private final OrderRepository orderRepository;
 
+    // [관리자 배송조회] 14시 기준 배송 대상 주문을 이메일별로 병합하여 전체 조회
     public List<DeliveryOrderResponse> getDeliveryOrders(LocalDate date) {
 
-        // 조회 날짜(당일)의 14시를 종료 시간으로 설정
         LocalDateTime end = date.atTime(DELIVERY_CUTOFF_TIME);
-
-        // 종료 시간 기준 하루 전(전날) 14시를 시작 시간으로 설정
         LocalDateTime start = end.minusDays(1);
 
-        // 배송 대상 시간대 (start 이상, end 미만)에 생성된 주문 목록 조회
+        // 배송 대상 시간 범위의 주문 조회
         List<Order> orders =
             orderRepository.findByOrderDateGreaterThanEqualAndOrderDateLessThan(start, end);
 
-        // 주문 목록을 고객 이메일 기준으로 그룹화
+        return mergeOrders(orders);
+    }
+
+    // [이메일 검색] 해당 이메일의 14시 기준 배송 대상 주문 조회
+    public List<DeliveryOrderResponse> getDeliveryOrdersByEmail(
+        LocalDate date,
+        String email
+    ) {
+        LocalDateTime end = date.atTime(DELIVERY_CUTOFF_TIME);
+        LocalDateTime start = end.minusDays(1);
+
+        // 이메일 + 배송 대상 시간 범위의 주문 조회
+        List<Order> orders =
+            orderRepository.findByEmailAndOrderDateGreaterThanEqualAndOrderDateLessThan(
+                email,
+                start,
+                end
+            );
+
+        return mergeOrders(orders);
+    }
+
+    // 주문 목록을 이메일 기준으로 병합
+    private List<DeliveryOrderResponse> mergeOrders(List<Order> orders) {
+
         Map<String, List<Order>> groupedOrders =
             orders.stream()
                 .collect(Collectors.groupingBy(Order::getEmail));
 
         List<DeliveryOrderResponse> responses = new ArrayList<>();
 
-        // 이메일별 주문 목록 하나씩 순회
         for (Map.Entry<String, List<Order>> entry : groupedOrders.entrySet()) {
 
             String email = entry.getKey();
             List<Order> emailOrders = entry.getValue();
 
-            // 이메일에 해당하는 모든 주문 상품 목록을 하나로 나열
+            // 여러 주문의 OrderItem을 하나의 리스트로 펼침
             List<OrderItem> orderItems =
                 emailOrders.stream()
                     .flatMap(order -> order.getOrderItems().stream())
                     .toList();
 
-            // 상품 ID를 key로 같은 상품 수량 확인 후 합산
+            // 상품 ID를 Key로 사용하고 같은 상품의 수량 합산
             Map<Long, Integer> productQuantities =
                 orderItems.stream()
                     .collect(Collectors.toMap(
@@ -63,25 +83,12 @@ public class DeliveryService {
                         Integer::sum
                     ));
 
-            // 이메일과 상품별 합산 수량을 응답 목록에 추가
             responses.add(new DeliveryOrderResponse(
                 email,
                 productQuantities
             ));
         }
 
-        // 병합된 주문 응답 목록 반환
         return responses;
-    }
-
-    // 고객 이메일에 해당하는 배송 주문 조회
-    public List<DeliveryOrderResponse> getDeliveryOrdersByEmail(
-        LocalDate date,
-        String email
-    ) {
-        return getDeliveryOrders(date)
-            .stream()
-            .filter(response -> response.getEmail().equals(email))
-            .toList();
     }
 }
