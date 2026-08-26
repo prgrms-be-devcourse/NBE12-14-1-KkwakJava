@@ -14,15 +14,20 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ProductService {
 
+    private final ProductImageService productImageService;
     private final ProductRepository productRepository;
 
     // 상품 등록
     @Transactional
     public Product createProduct(ProductCreateRequest request) {
 
+        // 이미지 저장 후 이미지 URL을 가져온다.
+        String imageUrl = productImageService.save(request.image());
+
         Product product = new Product(
                 request.name(),
-                request.price()
+                request.price(),
+                imageUrl
         );
 
         return productRepository.save(product);
@@ -50,7 +55,19 @@ public class ProductService {
                                 new IllegalArgumentException( "존재하지 않는 상품입니다. id = " + id)
                         );
 
-        product.update(request.name(), request.price());
+        // 기존 이미지 URL을 유지
+        String imageUrl = product.getImageUrl();
+
+        // 새로운 이미지가 첨부된 경우에만 이미지를 저장
+        if (request.image() != null && !request.image().isEmpty()) {
+            imageUrl = productImageService.save(request.image());
+        }
+
+        product.update(
+                request.name(),
+                request.price(),
+                imageUrl
+        );
 
         return product;
     }
