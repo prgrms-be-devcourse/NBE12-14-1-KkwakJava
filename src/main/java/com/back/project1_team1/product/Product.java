@@ -1,10 +1,9 @@
 package com.back.project1_team1.product;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 
 @Entity
 @Table(name = "products")
@@ -20,7 +19,14 @@ public class Product {
 
     private int price; // 상품 가격
 
+    // 상품 등록시 사용하는 생성자
     public Product(String name, int price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    // Setter 대신 수정 메서드
+    public void update(String name, int price) {
         this.name = name;
         this.price = price;
     }
