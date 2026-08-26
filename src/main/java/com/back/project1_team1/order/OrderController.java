@@ -2,6 +2,7 @@ package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -53,7 +54,7 @@ public class OrderController {
     // 클라이언트의 주문 요청을 받아 OrderService에 전달
     @PostMapping
     @ResponseBody
-    public void createOrder(@RequestBody OrderCreateRequest request) {
-        orderService.createOrder(request); // 주문 생성 요청
+    public OrderResponse createOrder(@Valid @RequestBody OrderCreateRequest request) {
+        return orderService.createOrder(request); // 주문 생성 요청
     }
 }

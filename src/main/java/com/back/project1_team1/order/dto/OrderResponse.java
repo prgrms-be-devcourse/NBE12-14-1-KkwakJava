@@ -8,6 +8,8 @@ public record OrderResponse(
 
     Long orderId,
     String email,
+    String postalCode,
+    String address,
     LocalDateTime orderDate,
     int totalAmount,
     List<OrderItemResponse> items
@@ -30,6 +32,8 @@ public record OrderResponse(
         return new OrderResponse(
             order.getId(),
             order.getEmail(),
+            order.getPostalCode(),
+            order.getAddress(),
             order.getOrderDate(),
             calculatedTotalAmount,
             itemResponses
