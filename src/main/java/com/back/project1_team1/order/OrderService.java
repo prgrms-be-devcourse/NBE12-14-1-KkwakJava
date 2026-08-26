@@ -1,5 +1,7 @@
 package com.back.project1_team1.order;
 
+import com.back.project1_team1.global.GlobalExceptionHandler;
+import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderItemRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
@@ -62,7 +64,7 @@ public class OrderService {
             Product product = productRepository
                 .findById(itemRequest.productId())
                 .orElseThrow(() ->
-                    new IllegalArgumentException(
+                    new ResourceNotFoundException(
                         "존재하지 않는 상품입니다. id = " + itemRequest.productId()
                     )
                 );
