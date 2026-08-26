@@ -13,10 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class OrderServiceTest {
 
     @Autowired
@@ -46,7 +48,11 @@ class OrderServiceTest {
 
         // 3. 10개의 주문 데이터 생성 및 저장 (주문당 상품 2종류 포함)
         for (int i = 0; i < 10; i++) {
-            Order order = new Order(emails[i], LocalDateTime.now().minusDays(10 - i));
+            Order order = new Order(
+                emails[i],
+                "12345",
+                "서울시 강남구 테스트로 " + (i + 1),
+                LocalDateTime.now().minusDays(10 - i));
 
             // 상품 추가 (Cascade로 인해 OrderItem도 자동 persist 됨)
             order.addOrderItem((i % 2 == 0) ? p1 : p3, (i % 3) + 1);

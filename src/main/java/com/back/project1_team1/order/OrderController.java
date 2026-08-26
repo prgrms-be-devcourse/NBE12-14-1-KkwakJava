@@ -2,13 +2,13 @@ package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,8 +40,8 @@ public class OrderController {
     // 클라이언트의 주문 요청을 받아 OrderService에 전달
     @PostMapping
     @ResponseBody
-    public void createOrder(@RequestBody OrderCreateRequest request) {
-        orderService.createOrder(request); // 주문 생성 요청
+    public OrderResponse createOrder(@Valid @RequestBody OrderCreateRequest request) {
+        return orderService.createOrder(request); // 주문 생성 요청
     }
 
     //단건 삭제
@@ -69,7 +69,5 @@ public class OrderController {
                .body(Map.of("message", e.getMessage()));
         }
     }
-
-
 
 }
