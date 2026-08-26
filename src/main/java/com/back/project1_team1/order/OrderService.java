@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
 
     // 전체 주문 목록 조회
@@ -46,46 +45,74 @@ public class OrderService {
 
     // 주문 생성
     @Transactional // 주문 생성 전체를 한 작업 단위로 묶기
-    public void createOrder(OrderCreateRequest request) {
+    public OrderResponse createOrder(OrderCreateRequest request) {
 
-        // dto에서 가져온 email 저장
-        // 현재 서버 시각 저장
+        // 요청 DTO의 고객 정보와 현재 서버 시각으로 주문 생성
         Order order = new Order(
             request.email(),
+            request.postalCode(),
+            request.address(),
             LocalDateTime.now()
         );
 
-        orderRepository.save(order); // DB에 order 저장 요청
-
-        // 요청에 포함된 주문 상품 목록 순회하면서 OrderItem 생성
+        // 요청에 포함된 주문 상품 목록 순회
         for (OrderItemRequest itemRequest : request.items()) {
 
             // productId에 해당하는 상품 조회
             Product product = productRepository
                 .findById(itemRequest.productId())
-                .orElseThrow();
+                .orElseThrow(() ->
+                    new IllegalArgumentException(
+                        "존재하지 않는 상품입니다. id = " + itemRequest.productId()
+                    )
+                );
 
-            // 주문, 상품, 수량을 연결하여 주문 상품 생성
-            OrderItem orderItem = new OrderItem(
-                order,
+            // OrderItem 생성 + Order와 연관관계 연결
+            order.addOrderItem(
                 product,
                 itemRequest.quantity()
             );
-
-            orderItemRepository.save(orderItem); // DB에 주문 상품 저장 요청
         }
+
+        // Order 저장 시 CascadeType.PERSIST에 의해 OrderItem도 함께 저장
+        Order savedOrder = orderRepository.save(order);
+
+        return OrderResponse.from(savedOrder);
     }
 
-    // 주문 삭제
+    //단건 삭제
     @Transactional
-    public List<Order> findAll() {
-        return orderRepository.findAll();
-    }
-
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. id = " + orderId));
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. id=" + orderId));
+
+        if (order.isAlreadyDelivered(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 배송된 주문이라 삭제할 수 없습니다");
+        }
 
         orderRepository.delete(order);
+    }
+
+    // 다건 삭제
+    @Transactional
+    public void deleteOrders(List<Long> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) {
+            throw new IllegalArgumentException("삭제할 주문을 선택하세요");
+        }
+
+        List<Order> orders = orderRepository.findAllById(orderIds);
+
+        if (orders.size() != orderIds.size()) {
+            throw new IllegalArgumentException("존재하지 않는 주문이 포함되어 있습니다");
+        }
+
+        boolean anyAlreadyDelivered = orders.stream()
+            .anyMatch(order -> order.isAlreadyDelivered(LocalDateTime.now()));
+
+        if (anyAlreadyDelivered) {
+            throw new IllegalStateException("이미 배송된 주문이라 삭제할 수 없습니다");
+        }
+
+        orderRepository.deleteAll(orders);
     }
 }
