@@ -4,6 +4,7 @@ import com.back.project1_team1.product.Product;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -16,11 +17,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
+    // 배송 마감 시각(매일 14시 기준으로 전날 14시~당일 14시 주문을 묶어 배송)
+    private static final LocalTime DELIVERY_CUTOFF_TIME = LocalTime.of(14, 0);
+
     @Id // 주문 테이블의 기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
     private Long id;
 
     private String email;
+
+    private String postalCode; // 우편번호
+    private String address; // 주소
 
     // 주문 날짜 및 시각
     // 클라이언트가 전달하지 않고 주문 생성 시 서버에서 자동으로 생성
@@ -34,8 +41,15 @@ public class Order {
     private List<OrderItem> orderItems = new ArrayList<>(); // 주문 상품 목록
 
 
-    public Order(String email, LocalDateTime orderDate) {
+    public Order(
+        String email,
+        String postalCode,
+        String address,
+        LocalDateTime orderDate
+    ) {
         this.email = email;
+        this.postalCode = postalCode;
+        this.address = address;
         this.orderDate = orderDate;
     }
 
@@ -44,6 +58,15 @@ public class Order {
     public void addOrderItem(Product product, int quantity) {
         OrderItem item = new OrderItem(this, product, quantity);
         this.orderItems.add(item);
+    }
+
+    // 이 주문이 속한 배송 묶음의 마감(발송) 시각이 현재 지났는지 여부
+    public boolean isAlreadyDelivered(LocalDateTime now) {
+        LocalDateTime deliveredAt = orderDate.toLocalTime().isBefore(DELIVERY_CUTOFF_TIME)
+            ? orderDate.toLocalDate().atTime(DELIVERY_CUTOFF_TIME)
+            : orderDate.toLocalDate().plusDays(1).atTime(DELIVERY_CUTOFF_TIME);
+
+        return !now.isBefore(deliveredAt);
     }
 
 }

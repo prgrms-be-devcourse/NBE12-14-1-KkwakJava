@@ -42,3 +42,6 @@ db_dev.trace.db
 
 ### Postman ###
 .postman/
+
+
+src/main/resources/application-local.yml
