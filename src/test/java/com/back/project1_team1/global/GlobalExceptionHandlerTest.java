@@ -47,19 +47,20 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("IllegalStateException 발생 시 400 BAD_REQUEST와 에러 메시지를 반환한다.")
+    @DisplayName("IllegalStateException 발생 시 409 CONFLICT와 에러 메시지를 반환한다.")
     void handleIllegalState() {
         // given
         IllegalStateException exception = new IllegalStateException("이미 배송 완료된 주문은 취소할 수 없습니다.");
 
         // when
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleIllegalState(exception);
+        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+            handler.handleIllegalState(exception);
 
         // then
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(400, response.getBody().status());
-        assertEquals("BAD_REQUEST", response.getBody().error());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals(409, response.getBody().status());
+        assertEquals("CONFLICT", response.getBody().error());
         assertEquals("이미 배송 완료된 주문은 취소할 수 없습니다.", response.getBody().message());
     }
 

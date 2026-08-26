@@ -62,16 +62,16 @@ public class GlobalExceptionHandler {
             ));
     }
 
-    // 400 BAD_REQUEST: 현재 상태에서 요청을 수행할 수 없음
+    // 409 CONFLICT: 현재 리소스의 상태와 충돌하여 요청을 수행할 수 없음
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalState(
         IllegalStateException e) {
 
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
+            .status(HttpStatus.CONFLICT)
             .body(new ErrorResponse(
-                400,
-                "BAD_REQUEST",
+                409,
+                "CONFLICT",
                 e.getMessage()
             ));
     }
