@@ -1,6 +1,7 @@
 package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.DeliveryOrderResponse;
+import com.back.project1_team1.order.dto.DeliveryOrderResponse.DeliveryItemResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -57,35 +58,59 @@ public class DeliveryService {
     // 주문 목록을 이메일 기준으로 병합
     private List<DeliveryOrderResponse> mergeOrders(List<Order> orders) {
 
+        // 같은 이메일의 주문끼리 그룹화
         Map<String, List<Order>> groupedOrders =
             orders.stream()
                 .collect(Collectors.groupingBy(Order::getEmail));
 
+        // 최종 배송 조회 결과를 담을 리스트
         List<DeliveryOrderResponse> responses = new ArrayList<>();
 
+        // 이메일별 주문 그룹을 하나씩 처리
         for (Map.Entry<String, List<Order>> entry : groupedOrders.entrySet()) {
 
             String email = entry.getKey();
             List<Order> emailOrders = entry.getValue();
 
-            // 여러 주문의 OrderItem을 하나의 리스트로 펼침
+            // 같은 이메일의 여러 주문에 포함된 OrderItem을 하나의 리스트로 펼침
             List<OrderItem> orderItems =
                 emailOrders.stream()
                     .flatMap(order -> order.getOrderItems().stream())
                     .toList();
 
-            // 상품 ID를 Key로 사용하고 같은 상품의 수량 합산
-            Map<Long, Integer> productQuantities =
+            // 같은 상품의 수량을 합산하기 위해 상품 ID 기준으로 그룹화
+            Map<Long, List<OrderItem>> groupedItems =
                 orderItems.stream()
-                    .collect(Collectors.toMap(
-                        orderItem -> orderItem.getProduct().getId(),
-                        OrderItem::getQuantity,
-                        Integer::sum
+                    .collect(Collectors.groupingBy(
+                        orderItem -> orderItem.getProduct().getId()
                     ));
 
+            // 병합된 상품 정보를 담을 리스트
+            List<DeliveryItemResponse> deliveryItems = new ArrayList<>();
+
+            // 상품별로 묶인 OrderItem 처리
+            for (List<OrderItem> sameProductItems : groupedItems.values()) {
+
+                // 같은 상품끼리 묶여 있으므로 첫 번째 항목에서 상품 정보 가져오기
+                OrderItem firstItem = sameProductItems.get(0);
+
+                // 같은 상품의 주문 수량 모두 합산
+                int quantity = sameProductItems.stream()
+                    .mapToInt(OrderItem::getQuantity)
+                    .sum();
+
+                // 상품 ID, 상품명, 합산 수량을 배송 응답 DTO에 추가
+                deliveryItems.add(new DeliveryItemResponse(
+                    firstItem.getProduct().getId(),
+                    firstItem.getProduct().getName(),
+                    quantity
+                ));
+            }
+
+            // 이메일과 병합된 상품 목록을 최종 응답에 추가
             responses.add(new DeliveryOrderResponse(
                 email,
-                productQuantities
+                deliveryItems
             ));
         }
 
