@@ -85,20 +85,20 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
+
+    // 다건 삭제
     @Transactional
     public void deleteOrders(List<Long> orderIds) {
-        if(orderIds == null || orderIds.isEmpty()) {
+        if (orderIds == null || orderIds.isEmpty()) {
             throw new IllegalArgumentException("삭제할 주문을 선택하세요");
         }
 
         List<Order> orders = orderRepository.findAllById(orderIds);
 
-        if(orders.size() != orderIds.size()) {
+        if (orders.size() != orderIds.size()) {
             throw new IllegalArgumentException("존재하지 않는 주문이 포함되어 있습니다");
         }
 
         orderRepository.deleteAll(orders);
     }
-
-
 }
