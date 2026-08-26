@@ -63,7 +63,7 @@ public class ProductService {
                         new IllegalArgumentException("존재하지 않는 상품입니다. id = " + id)
                 );
 
-        productRepository.deleteById(id);
+        productRepository.delete(product);
     }
 
 }
