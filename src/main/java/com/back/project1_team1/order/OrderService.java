@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    // private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
 
     // 전체 주문 목록 조회
@@ -81,16 +80,39 @@ public class OrderService {
         return OrderResponse.from(savedOrder);
     }
 
-    // 주문 삭제
+    //단건 삭제
     @Transactional
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() ->
-                new IllegalArgumentException(
-                    "존재하지 않는 주문입니다. id = " + orderId
-                )
-            );
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. id=" + orderId));
+
+        if (order.isAlreadyDelivered(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 배송된 주문이라 삭제할 수 없습니다");
+        }
 
         orderRepository.delete(order);
+    }
+
+    // 다건 삭제
+    @Transactional
+    public void deleteOrders(List<Long> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) {
+            throw new IllegalArgumentException("삭제할 주문을 선택하세요");
+        }
+
+        List<Order> orders = orderRepository.findAllById(orderIds);
+
+        if (orders.size() != orderIds.size()) {
+            throw new IllegalArgumentException("존재하지 않는 주문이 포함되어 있습니다");
+        }
+
+        boolean anyAlreadyDelivered = orders.stream()
+            .anyMatch(order -> order.isAlreadyDelivered(LocalDateTime.now()));
+
+        if (anyAlreadyDelivered) {
+            throw new IllegalStateException("이미 배송된 주문이라 삭제할 수 없습니다");
+        }
+
+        orderRepository.deleteAll(orders);
     }
 }
