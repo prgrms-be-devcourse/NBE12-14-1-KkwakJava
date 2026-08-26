@@ -3,6 +3,7 @@ package com.back.project1_team1.product.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.web.multipart.MultipartFile;
 
 public record ProductCreateRequest(
 
@@ -11,7 +12,9 @@ public record ProductCreateRequest(
 
         @NotNull(message = "상품 가격은 필수입니다.")
         @PositiveOrZero(message = "상품 가격은 0 이상이여야 합니다.")
-        Integer price
+        Integer price,
+
+        MultipartFile image
 ) {
 
 }
