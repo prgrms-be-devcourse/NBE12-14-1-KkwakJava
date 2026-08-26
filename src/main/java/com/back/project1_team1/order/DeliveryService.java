@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class DeliveryService {
 
+    // 배송 처리 기준 시간 (오후 2시)
     private static final LocalTime DELIVERY_CUTOFF_TIME = LocalTime.of(14, 0);
 
     private final OrderRepository orderRepository;
@@ -71,5 +72,16 @@ public class DeliveryService {
 
         // 병합된 주문 응답 목록 반환
         return responses;
+    }
+
+    // 고객 이메일에 해당하는 배송 주문 조회
+    public List<DeliveryOrderResponse> getDeliveryOrdersByEmail(
+        LocalDate date,
+        String email
+    ) {
+        return getDeliveryOrders(date)
+            .stream()
+            .filter(response -> response.getEmail().equals(email))
+            .toList();
     }
 }

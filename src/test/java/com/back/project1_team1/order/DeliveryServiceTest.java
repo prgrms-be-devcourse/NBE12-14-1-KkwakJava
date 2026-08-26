@@ -163,4 +163,43 @@ class DeliveryServiceTest {
                 "beforeEnd@test.com"
             );
     }
+
+    @Test
+    @DisplayName("이메일로 조회하면 해당 고객의 배송 주문만 반환된다")
+    void findDeliveryOrdersByEmail() {
+
+        // 테스트용 상품 생성
+        Product product = productRepository.save(
+            new Product("TEST_BEAN", 10000)
+        );
+
+        // 서로 다른 이메일의 주문 생성
+        Order order1 = new Order(
+            "customer1@test.com",
+            LocalDateTime.of(2026, 8, 25, 15, 0)
+        );
+        order1.addOrderItem(product, 2);
+
+        Order order2 = new Order(
+            "customer2@test.com",
+            LocalDateTime.of(2026, 8, 25, 16, 0)
+        );
+        order2.addOrderItem(product, 3);
+
+        // 주문 저장
+        orderRepository.save(order1);
+        orderRepository.save(order2);
+
+        // customer1 이메일로 배송 주문 조회
+        List<DeliveryOrderResponse> result =
+            deliveryService.getDeliveryOrdersByEmail(
+                LocalDate.of(2026, 8, 26),
+                "customer1@test.com"
+            );
+
+        // 해당 이메일의 배송 주문만 조회되는지 확인
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEmail())
+            .isEqualTo("customer1@test.com");
+    }
 }

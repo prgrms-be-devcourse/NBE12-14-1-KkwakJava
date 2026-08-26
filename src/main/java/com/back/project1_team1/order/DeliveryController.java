@@ -21,7 +21,12 @@ public class DeliveryController {
     public List<DeliveryOrderResponse> getDeliveryOrders(
         @RequestParam
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate date) {
+        LocalDate date,
+        @RequestParam(required = false) String email) {
+
+        if (email != null && !email.isBlank()) {
+            return deliveryService.getDeliveryOrdersByEmail(date, email);
+        }
 
         return deliveryService.getDeliveryOrders(date);
     }
