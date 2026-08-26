@@ -46,7 +46,7 @@ public class OrderService {
 
     // 주문 생성
     @Transactional // 주문 생성 전체를 한 작업 단위로 묶기
-    public void createOrder(OrderCreateRequest request) {
+    public OrderResponse createOrder(OrderCreateRequest request) {
 
         // 요청 DTO의 고객 정보와 현재 서버 시각으로 주문 생성
         Order order = new Order(
@@ -76,7 +76,9 @@ public class OrderService {
         }
 
         // Order 저장 시 CascadeType.PERSIST에 의해 OrderItem도 함께 저장
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        return OrderResponse.from(savedOrder);
     }
 
     // 주문 삭제

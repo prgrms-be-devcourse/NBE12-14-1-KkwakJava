@@ -53,7 +53,7 @@ public class OrderController {
     // 클라이언트의 주문 요청을 받아 OrderService에 전달
     @PostMapping
     @ResponseBody
-    public void createOrder(@RequestBody OrderCreateRequest request) {
-        orderService.createOrder(request); // 주문 생성 요청
+    public OrderResponse createOrder(@RequestBody OrderCreateRequest request) {
+        return orderService.createOrder(request); // 주문 생성 요청
     }
 }
