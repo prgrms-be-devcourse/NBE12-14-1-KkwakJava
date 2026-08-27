@@ -2,6 +2,7 @@ package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import com.back.project1_team1.order.dto.OrderUpdateRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +47,14 @@ public class OrderController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PutMapping("/{orderId}")
+    @ResponseBody
+    public OrderResponse modifyOrder(
+        @PathVariable("orderId") Long orderId,
+        @Valid @RequestBody OrderUpdateRequest request) {
+        return this.orderService.modifyOrder(orderId, request );
     }
 
     //단건 삭제

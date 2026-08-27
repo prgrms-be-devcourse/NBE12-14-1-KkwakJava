@@ -110,8 +110,15 @@ class DeliveryServiceTest {
         DeliveryOrderResponse response = result.get(0);
 
         // 같은 상품의 수량이 2 + 3 = 5로 합산되었는지 확인
-        assertThat(response.getItems())
-            .isEqualTo(Map.of(product.getId(), 5));
+        // 같은 상품의 수량이 2 + 3 = 5로 합산되었는지 확인
+        assertThat(response.getItems()).hasSize(1);
+
+        DeliveryOrderResponse.DeliveryItemResponse item =
+            response.getItems().get(0);
+
+        assertThat(item.productId()).isEqualTo(product.getId());
+        assertThat(item.productName()).isEqualTo("TEST_BEAN");
+        assertThat(item.quantity()).isEqualTo(5);
     }
 
     @Test

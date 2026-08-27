@@ -1,11 +1,13 @@
 package com.back.project1_team1.order;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.back.project1_team1.product.Product;
 import com.back.project1_team1.product.ProductRepository;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ class OrderControllerTest {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Test
     @DisplayName("이메일이 비어 있으면 주문 생성 요청은 400을 반환한다")
@@ -343,5 +348,57 @@ class OrderControllerTest {
             .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
             .andExpect(jsonPath("$.message")
                 .value("주문 상품은 최소 1개 이상이어야 합니다."));
+    @DisplayName("정상적인 주문 수정 요청은 200 OK와 함께 수정된 정보를 반환한다")
+    void modifyOrder_success() throws Exception {
+        // given
+        Product product = productRepository.save(new Product("Colombia Narino", 5000));
+        Order order = new Order("test@test.com", "12345", "서울시 강남구", LocalDateTime.now());
+        order.addOrderItem(product, 1);
+        Order savedOrder = orderRepository.save(order);
+
+        String updateJson = """
+        {
+            "postalCode": "99999",
+            "address": "서울시 송파구 수정로 2",
+            "items": [
+                {
+                    "productId": %d,
+                    "quantity": 3
+                }
+            ]
+        }
+        """.formatted(product.getId());
+
+        // when & then
+        mockMvc.perform(
+                put("/orders/" + savedOrder.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(updateJson)
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.orderId").value(savedOrder.getId()))
+            .andExpect(jsonPath("$.postalCode").value("99999"))
+            .andExpect(jsonPath("$.address").value("서울시 송파구 수정로 2"))
+            .andExpect(jsonPath("$.totalAmount").value(15000))
+            .andExpect(jsonPath("$.items[0].quantity").value(3));
+    }
+
+    @Test
+    @DisplayName("주문 수정 시 주문 상품이 비어있으면 400 Bad Request를 반환한다")
+    void modifyOrder_emptyItems_badRequest() throws Exception {
+        String updateJson = """
+        {
+            "postalCode": "99999",
+            "address": "서울시 송파구 수정로 2",
+            "items": []
+        }
+        """;
+
+        mockMvc.perform(
+                put("/orders/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(updateJson)
+            )
+            .andExpect(status().isBadRequest());
     }
 }
