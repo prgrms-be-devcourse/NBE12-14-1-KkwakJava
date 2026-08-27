@@ -21,8 +21,22 @@ public class DeliveryController {
     public List<DeliveryOrderResponse> getDeliveryOrders(
         @RequestParam
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate date) {
+        LocalDate date,
+        @RequestParam(required = false) String email) {
 
+        // 배송 대상 주문 조회: 이메일이 있으면 해당 이메일만, 없으면 전체 조회
+        if (email != null) {
+
+            // 이메일 파라미터가 전달됐지만 값이 비어 있는 경우
+            if (email.isBlank()) {
+                throw new IllegalArgumentException("이메일을 입력해주세요.");
+            }
+
+            // 해당 이메일의 배송 대상 주문 조회
+            return deliveryService.getDeliveryOrdersByEmail(date, email);
+        }
+
+        // 전체 배송 대상 주문 조회
         return deliveryService.getDeliveryOrders(date);
     }
 }

@@ -1,6 +1,6 @@
 package com.back.project1_team1.order.dto;
 
-import java.util.Map;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,6 +9,13 @@ import lombok.Getter;
 public class DeliveryOrderResponse {
 
     private String email;
-    private Map<Long, Integer> items;
+    private List<DeliveryItemResponse> items;
+
+    public record DeliveryItemResponse(
+        Long productId,
+        String productName,
+        int quantity
+    ){
+    }
 
 }

@@ -2,23 +2,24 @@ package com.back.project1_team1.order;
 
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import com.back.project1_team1.order.dto.OrderUpdateRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
@@ -27,7 +28,6 @@ public class OrderController {
 
     // 주문 목록 및 이메일 조건 조회 (JSON 응답)
     @GetMapping
-    @ResponseBody
     public List<OrderResponse> getOrders(@RequestParam(required = false) String email) {
         if (email != null && !email.isBlank()) {
             return this.orderService.findByEmail(email);
@@ -39,45 +39,36 @@ public class OrderController {
     // 주문 생성 API
     // 클라이언트의 주문 요청을 받아 OrderService에 전달
     @PostMapping
+    public ResponseEntity<OrderResponse> createOrder(
+        @Valid @RequestBody OrderCreateRequest request) {
+
+        OrderResponse response = orderService.createOrder(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PutMapping("/{orderId}")
     @ResponseBody
-    public OrderResponse createOrder(@Valid @RequestBody OrderCreateRequest request) {
-        return orderService.createOrder(request); // 주문 생성 요청
+    public OrderResponse modifyOrder(
+        @PathVariable("orderId") Long orderId,
+        @Valid @RequestBody OrderUpdateRequest request) {
+        return this.orderService.modifyOrder(orderId, request );
     }
 
     //단건 삭제
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
-        try {
-            orderService.deleteOrder(orderId);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            // orderId에 해당하는 주문이 존재하지 않는 경우 (OrderService.deleteOrder)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", e.getMessage()));
-        } catch (IllegalStateException e) {
-            // 배송 마감 시간이 지나 이미 배송된 주문인 경우 (OrderService.deleteOrder)
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("message", e.getMessage()));
-        }
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.noContent().build();
     }
 
     //다건삭제
     @DeleteMapping
     public ResponseEntity<?> deleteOrders(
         @RequestParam List<Long> orderIds) {
-
-       try {
-           orderService.deleteOrders(orderIds);
-           return ResponseEntity.noContent().build();
-       } catch (IllegalArgumentException e) {
-           // orderIds가 비어있거나, 존재하지 않는 주문 id가 포함된 경우 (OrderService.deleteOrders)
-           return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-               .body(Map.of("message", e.getMessage()));
-       } catch (IllegalStateException e) {
-           // 배송 마감 시간이 지나 이미 배송된 주문이 포함된 경우 (OrderService.deleteOrders)
-           return ResponseEntity.status(HttpStatus.CONFLICT)
-               .body(Map.of("message", e.getMessage()));
-       }
+        orderService.deleteOrders(orderIds);
+        return ResponseEntity.noContent().build();
     }
-
 }
