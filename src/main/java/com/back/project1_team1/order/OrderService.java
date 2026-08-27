@@ -1,8 +1,11 @@
 package com.back.project1_team1.order;
 
+import com.back.project1_team1.global.GlobalExceptionHandler;
+import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderItemRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import com.back.project1_team1.order.dto.OrderUpdateRequest;
 import com.back.project1_team1.product.Product;
 import com.back.project1_team1.product.ProductRepository;
 import java.time.LocalDateTime;
@@ -47,6 +50,16 @@ public class OrderService {
     @Transactional // 주문 생성 전체를 한 작업 단위로 묶기
     public OrderResponse createOrder(OrderCreateRequest request) {
 
+        // 동일한 상품이 주문 목록에 중복되어 있는지 검사
+        long distinctProductCount = request.items().stream()
+            .map(OrderItemRequest::productId)
+            .distinct()
+            .count();
+
+        if (distinctProductCount != request.items().size()) {
+            throw new IllegalArgumentException("동일한 상품을 중복하여 주문할 수 없습니다.");
+        }
+
         // 요청 DTO의 고객 정보와 현재 서버 시각으로 주문 생성
         Order order = new Order(
             request.email(),
@@ -62,7 +75,7 @@ public class OrderService {
             Product product = productRepository
                 .findById(itemRequest.productId())
                 .orElseThrow(() ->
-                    new IllegalArgumentException(
+                    new ResourceNotFoundException(
                         "존재하지 않는 상품입니다. id = " + itemRequest.productId()
                     )
                 );
@@ -80,11 +93,43 @@ public class OrderService {
         return OrderResponse.from(savedOrder);
     }
 
+    // 주문 수정
+    @Transactional
+    public OrderResponse modifyOrder(Long orderId, OrderUpdateRequest request) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 주문입니다. id=" + orderId));
+
+        // 배송 마감 여부 체크
+        if (order.isAlreadyDelivered(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 배송된 주문이라 수정할 수 없습니다.");
+        }
+
+        // 배송지 수정
+        order.updateDeliveryAddress(request.postalCode(), request.address());
+
+        // 주문 상품 목록 갱신
+        order.clearOrderItems();
+
+        for (OrderItemRequest itemRequest : request.items()) {
+            Product product = productRepository.findById(itemRequest.productId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "존재하지 않는 상품입니다. id=" + itemRequest.productId()));
+
+            order.addOrderItem(product, itemRequest.quantity());
+        }
+
+        // 새 OrderItem의 ID를 생성하고 수정 내용을 DB에 즉시 반영한 후 응답하기 위해 flush
+        orderRepository.flush();
+
+        return OrderResponse.from(order);
+    }
+
+
     //단건 삭제
     @Transactional
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. id=" + orderId));
+            .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 주문입니다. id=" + orderId));
 
         if (order.isAlreadyDelivered(LocalDateTime.now())) {
             throw new IllegalStateException("이미 배송된 주문이라 삭제할 수 없습니다");
@@ -103,7 +148,7 @@ public class OrderService {
         List<Order> orders = orderRepository.findAllById(orderIds);
 
         if (orders.size() != orderIds.size()) {
-            throw new IllegalArgumentException("존재하지 않는 주문이 포함되어 있습니다");
+            throw new ResourceNotFoundException("존재하지 않는 주문이 포함되어 있습니다");
         }
 
         boolean anyAlreadyDelivered = orders.stream()
