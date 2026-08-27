@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 
 import { createOrder } from '@/api/orderApi';
 import { getProducts } from '@/api/productApi';
@@ -209,33 +208,6 @@ export default function OrderPage() {
 
   return (
       <main className="min-h-screen bg-[#F6F5F2] text-[#2B2523]">
-        {/* 고객 페이지 헤더 */}
-        <header className="border-b border-[#E9E5DC] bg-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-            <Link
-                href="/order"
-                className="text-xl font-bold text-[#4E2D1D]"
-            >
-              Grids & Circles
-            </Link>
-
-            <nav className="flex items-center gap-2">
-              <Link
-                  href="/order"
-                  className="rounded-lg bg-[#4E2D1D] px-4 py-2 text-sm font-semibold text-white"
-              >
-                원두 주문
-              </Link>
-
-              <Link
-                  href="/delivery"
-                  className="rounded-lg px-4 py-2 text-sm font-semibold text-[#4E2D1D] hover:bg-[#F6F4F0]"
-              >
-                배송 조회
-              </Link>
-            </nav>
-          </div>
-        </header>
 
         {/* 페이지 내용 */}
         <div className="mx-auto max-w-7xl px-6 py-10">
