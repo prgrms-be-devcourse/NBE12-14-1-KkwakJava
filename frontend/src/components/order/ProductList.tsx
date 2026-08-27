@@ -11,7 +11,7 @@ export default function ProductList({
                                       onAdd,
                                     }: ProductListProps) {
   return (
-      <section className="min-w-0 rounded-2xl border border-[#E9E5DC] bg-white p-4 shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
+      <section className="h-full min-w-0 rounded-2xl border border-[#E9E5DC] bg-white p-4 shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-[#2b2420] dark:text-[#f3e9dc]">
             원두 목록

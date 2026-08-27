@@ -15,7 +15,7 @@ export default function Cart({
                                onRemove,
                              }: CartProps) {
   return (
-      <div className="mb-8">
+      <div>
         <div className="mb-5">
           <h2 className="text-base font-bold text-[#2b2420] dark:text-[#f3e9dc]">
             주문 요약

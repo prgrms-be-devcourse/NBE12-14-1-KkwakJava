@@ -26,6 +26,7 @@ export default function OrderPage() {
 
   // 안내 메시지
   const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
 
   // 상품 조회 중인지 여부
   const [loading, setLoading] = useState(true);
@@ -141,15 +142,17 @@ export default function OrderPage() {
   // 주문하기
   const submitOrder = async () => {
     setMessage('');
+    setIsError(false);
 
     // 1. 상품 검증
     if (cart.length === 0) {
+      setIsError(true);
       setMessage('주문할 상품을 선택해주세요.');
       return;
     }
 
-    // 2. 이메일 검증
     if (!email.trim()) {
+      setIsError(true);
       setMessage('이메일을 입력해주세요.');
       return;
     }
@@ -157,18 +160,19 @@ export default function OrderPage() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email.trim())) {
-      setMessage('올바른 이메일 형식으로 입력해주세요.');
+      setIsError(true);
+      setMessage('올바른 이메일 형식으로 입력해주세요.\n(example@test.com)');
       return;
     }
 
-    // 3. 우편번호 검증
     if (!postalCode.trim()) {
+      setIsError(true);
       setMessage('우편번호를 입력해주세요.');
       return;
     }
 
-    // 4. 주소 검증
     if (!address.trim()) {
+      setIsError(true);
       setMessage('주소를 입력해주세요.');
       return;
     }
@@ -188,6 +192,7 @@ export default function OrderPage() {
     try {
       await createOrder(request);
 
+      setIsError(false);
       setMessage('주문이 완료되었습니다.');
 
       // 주문 완료 후 입력값 초기화
@@ -197,6 +202,8 @@ export default function OrderPage() {
       setAddress('');
     } catch (error) {
       console.error(error);
+
+      setIsError(true);
 
       if (error instanceof Error) {
         setMessage(error.message);
@@ -209,7 +216,7 @@ export default function OrderPage() {
   return (
       <main className="min-h-screen bg-[#F6F5F2] text-[#2b2420] dark:bg-[#201812] dark:text-[#f3e9dc]">
         <div className="px-6 pt-5 pb-8 sm:px-12">
-          <div className="mx-auto w-full max-w-6xl">
+          <div className="mx-auto w-full max-w-7xl">
             {/* 페이지 제목 */}
             <div className="mb-5 flex items-center gap-4">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F6F4F0] text-[#4E2D1D] dark:bg-[#3d2e22] dark:text-[#e8c9a0]">
@@ -234,22 +241,25 @@ export default function OrderPage() {
                   상품을 불러오는 중입니다.
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(380px,1fr)] xl:gap-8">
-                  {/* 왼쪽 상품 목록 */}
+                <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-[1.35fr_1fr_1fr]">
+                  {/* 1. 상품 목록 */}
                   <ProductList
                       products={products}
                       onAdd={addToCart}
                   />
 
-                  {/* 오른쪽 주문 영역 */}
-                  <section className="min-w-0 rounded-2xl border border-[#E9E5DC] bg-white p-6 shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
+                  {/* 2. 장바구니 */}
+                  <section className="h-full min-w-0 rounded-2xl border border-[#E9E5DC] bg-white p-6 shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
                     <Cart
                         cart={cart}
                         onIncrease={increaseQuantity}
                         onDecrease={decreaseQuantity}
                         onRemove={removeFromCart}
                     />
+                  </section>
 
+                  {/* 3. 고객 정보 */}
+                  <section className="h-full min-w-0 rounded-2xl border border-[#E9E5DC] bg-white p-6 shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
                     <OrderForm
                         email={email}
                         postalCode={postalCode}
@@ -262,8 +272,22 @@ export default function OrderPage() {
                     />
 
                     {message && (
-                        <div className="mt-5 rounded-lg bg-[#F6F4F0] px-4 py-3 text-sm font-medium text-[#4E2D1D] dark:bg-[#332720] dark:text-[#e8c9a0]">
-                          {message}
+                        <div
+                            className={`mt-5 flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium ${
+                                isError
+                                    ? 'bg-red-50 text-[#DC2626]'
+                                    : 'bg-[#F6F4F0] text-[#4E2D1D]'
+                            }`}
+                        >
+                          {isError && (
+                              <span aria-hidden="true">
+        ⚠️
+      </span>
+                          )}
+
+                          <span className="whitespace-pre-line">
+                              {message}
+                        </span>
                         </div>
                     )}
                   </section>

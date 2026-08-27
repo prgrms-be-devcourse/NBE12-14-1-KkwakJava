@@ -25,7 +25,7 @@ export default function OrderForm({
       'mt-2 block w-full rounded-lg border border-[#E9E5DC] bg-white px-3.5 py-3 text-sm outline-none focus:border-[#4E2D1D]';
 
   return (
-      <div className="border-t border-[#E9E5DC] pt-7">
+      <div>
         <div className="mb-6">
           <h2 className="text-xl font-bold text-[#4E2D1D]">
             주문 정보
@@ -87,7 +87,17 @@ export default function OrderForm({
         <button
             type="button"
             onClick={onSubmit}
-            className="w-full rounded-lg bg-[#4E2D1D] py-3.5 text-sm font-bold text-white hover:bg-[#523120]"
+            className="
+          w-full rounded-lg
+          bg-[#4E2D1D] py-2.5
+          text-sm font-semibold text-white
+          transition-all duration-200
+          hover:-translate-y-0.5
+          hover:bg-[#3D2115]
+          hover:shadow-md
+          dark:bg-[#e8c9a0] dark:text-[#201812]
+          dark:hover:bg-[#d9b98e]
+        "
         >
           주문하기
         </button>
