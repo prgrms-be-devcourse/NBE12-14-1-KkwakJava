@@ -182,7 +182,7 @@ class OrderControllerTest {
     }
 
     @Test
-    @DisplayName("정상적인 주문 생성 요청은 200을 반환한다")
+    @DisplayName("정상적인 주문 생성 요청은 201을 반환한다")
     void createOrder_success() throws Exception {
 
         // given: 주문할 상품을 테스트 DB에 먼저 저장
@@ -210,7 +210,7 @@ class OrderControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson)
             )
-            .andExpect(status().isOk())
+            .andExpect(status().isCreated())
             .andExpect(jsonPath("$.orderId").exists())
             .andExpect(jsonPath("$.email").value("test@test.com"))
             .andExpect(jsonPath("$.postalCode").value("12345"))
@@ -218,5 +218,130 @@ class OrderControllerTest {
             .andExpect(jsonPath("$.totalAmount").value(10000))
             .andExpect(jsonPath("$.items[0].productName").value("Colombia Narino"))
             .andExpect(jsonPath("$.items[0].quantity").value(2));
+    }
+
+    @Test
+    @DisplayName("동일한 상품을 중복하여 주문하면 400 Bad Request를 반환한다")
+    void createOrder_duplicateProduct_badRequest() throws Exception {
+
+        // given : 주문할 상품을 DB에 저장
+        Product product = productRepository.save(
+            new Product("Colombia Narino", 5000)
+        );
+
+        String requestJson = """
+    {
+        "email": "test@test.com",
+        "postalCode": "12345",
+        "address": "서울시 강남구 테스트로 1",
+        "items": [
+            {
+                "productId": %d,
+                "quantity": 2
+            },
+            {
+                "productId": %d,
+                "quantity": 3
+            }
+        ]
+    }
+    """.formatted(product.getId(), product.getId());
+
+        // when & then
+        mockMvc.perform(
+                post("/orders")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.message")
+                .value("동일한 상품을 중복하여 주문할 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 ID로 주문하면 404 Not Found를 반환한다")
+    void createOrder_invalidProduct_notFound() throws Exception {
+
+        String requestJson = """
+    {
+        "email": "test@test.com",
+        "postalCode": "12345",
+        "address": "서울시 강남구 테스트로 1",
+        "items": [
+            {
+                "productId": 999999,
+                "quantity": 2
+            }
+        ]
+    }
+    """;
+
+        mockMvc.perform(
+                post("/orders")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson)
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(404))
+            .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+            .andExpect(jsonPath("$.message")
+                .value("존재하지 않는 상품입니다. id = 999999"));
+    }
+
+    @Test
+    @DisplayName("상품 ID가 null이면 주문 생성 요청은 400 Bad Request를 반환한다")
+    void createOrder_nullProductId_badRequest() throws Exception {
+
+        String requestJson = """
+    {
+        "email": "test@test.com",
+        "postalCode": "12345",
+        "address": "서울시 강남구 테스트로 1",
+        "items": [
+            {
+                "productId": null,
+                "quantity": 2
+            }
+        ]
+    }
+    """;
+
+        mockMvc.perform(
+                post("/orders")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.message")
+                .value("상품 ID는 필수입니다."));
+    }
+
+    @Test
+    @DisplayName("주문 상품 목록이 null이면 주문 생성 요청은 400 Bad Request를 반환한다")
+    void createOrder_nullItems_badRequest() throws Exception {
+
+        String requestJson = """
+    {
+        "email": "test@test.com",
+        "postalCode": "12345",
+        "address": "서울시 강남구 테스트로 1",
+        "items": null
+    }
+    """;
+
+        mockMvc.perform(
+                post("/orders")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.message")
+                .value("주문 상품은 최소 1개 이상이어야 합니다."));
     }
 }
