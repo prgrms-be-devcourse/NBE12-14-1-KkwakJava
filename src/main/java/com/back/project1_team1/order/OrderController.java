@@ -4,11 +4,12 @@ import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
 import com.back.project1_team1.order.dto.OrderUpdateRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,18 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
+@Validated
 public class OrderController {
 
     private final OrderService orderService;
 
     // 주문 목록 및 이메일 조건 조회 (JSON 응답)
     @GetMapping
-    public List<OrderResponse> getOrders(@RequestParam(required = false) String email) {
-        if (email != null && !email.isBlank()) {
-            return this.orderService.findByEmail(email);
-        }
-
-        return this.orderService.findAll();
+    public List<OrderResponse> getOrders(@RequestParam(required = false) @Email String email) {
+        return this.orderService.getOrders(email);
     }
 
     // 주문 생성 API
@@ -50,9 +48,8 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}")
-    @ResponseBody
     public OrderResponse modifyOrder(
-        @PathVariable("orderId") Long orderId,
+        @PathVariable Long orderId,
         @Valid @RequestBody OrderUpdateRequest request) {
         return this.orderService.modifyOrder(orderId, request );
     }

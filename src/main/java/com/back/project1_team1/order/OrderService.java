@@ -46,6 +46,20 @@ public class OrderService {
         return orderResponses;
     }
 
+    public List<OrderResponse> getOrders(String email) {
+        List<Order> orders;
+
+        if(email != null && !email.isBlank()) {
+            orders = this.orderRepository.findByEmail(email);
+        }else{
+            orders = this.orderRepository.findAll();
+        }
+        return orders.stream()
+            .map(OrderResponse::from)
+            .toList();
+
+    }
+
     // 주문 생성
     @Transactional // 주문 생성 전체를 한 작업 단위로 묶기
     public OrderResponse createOrder(OrderCreateRequest request) {
