@@ -172,5 +172,30 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.modifyOrder(999999L, updateRequest))
             .isInstanceOf(ResourceNotFoundException.class);
     }
+    @Test
+    @DisplayName("통합 조회: 이메일이 전달되면 해당 이메일의 주문만 필터링되어 반환된다")
+    void getOrder_withEmail() {
+        // given
+        String email = "test1@test.com";
+
+        // when
+        List<OrderResponse> responses = orderService.getOrders(email);
+
+        // then
+        assertThat(responses).hasSize(2);
+        assertThat(responses).allMatch(res -> res.email().equals(email));
+    }
+
+    @Test
+    @DisplayName("통합 조회: 이메일이 null이거나 공백이면 전체 주문(10건)이 반환된다")
+    void getOrder_nullOrBlankEmail_returnsAll() {
+        // when
+        List<OrderResponse> nullResult = orderService.getOrders(null);
+        List<OrderResponse> blankResult = orderService.getOrders("   ");
+
+        // then
+        assertThat(nullResult).hasSize(10);
+        assertThat(blankResult).hasSize(10);
+    }
 
 }

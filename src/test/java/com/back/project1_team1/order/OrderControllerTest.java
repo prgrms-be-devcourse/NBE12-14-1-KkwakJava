@@ -330,13 +330,13 @@ class OrderControllerTest {
     void createOrder_nullItems_badRequest() throws Exception {
 
         String requestJson = """
-    {
-        "email": "test@test.com",
-        "postalCode": "12345",
-        "address": "서울시 강남구 테스트로 1",
-        "items": null
-    }
-    """;
+            {
+                "email": "test@test.com",
+                "postalCode": "12345",
+                "address": "서울시 강남구 테스트로 1",
+                "items": null
+            }
+            """;
 
         mockMvc.perform(
                 post("/orders")
@@ -348,6 +348,8 @@ class OrderControllerTest {
             .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
             .andExpect(jsonPath("$.message")
                 .value("주문 상품은 최소 1개 이상이어야 합니다."));
+    }
+    @Test
     @DisplayName("정상적인 주문 수정 요청은 200 OK와 함께 수정된 정보를 반환한다")
     void modifyOrder_success() throws Exception {
         // given
