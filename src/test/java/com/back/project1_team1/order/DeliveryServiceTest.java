@@ -46,12 +46,16 @@ class DeliveryServiceTest {
         // 같은 이메일로 서로 다른 주문 2건 생성
         Order order1 = new Order(
             "merge@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
             LocalDateTime.of(2026, 8, 25, 15, 0)
         );
         order1.addOrderItem(product1, 2);
 
         Order order2 = new Order(
             "merge@test.com",
+            "12345",
+            "서울시 강남구 테스트로 2",
             LocalDateTime.of(2026, 8, 25, 16, 0)
         );
         order2.addOrderItem(product2, 3);
@@ -81,12 +85,16 @@ class DeliveryServiceTest {
         // 같은 이메일로 같은 상품을 각각 2개, 3개 주문
         Order order1 = new Order(
             "merge@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
             LocalDateTime.of(2026, 8, 25, 15, 0)
         );
         order1.addOrderItem(product, 2);
 
         Order order2 = new Order(
             "merge@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
             LocalDateTime.of(2026, 8, 25, 16, 0)
         );
         order2.addOrderItem(product, 3);
@@ -102,8 +110,15 @@ class DeliveryServiceTest {
         DeliveryOrderResponse response = result.get(0);
 
         // 같은 상품의 수량이 2 + 3 = 5로 합산되었는지 확인
-        assertThat(response.getItems())
-            .isEqualTo(Map.of(product.getId(), 5));
+        // 같은 상품의 수량이 2 + 3 = 5로 합산되었는지 확인
+        assertThat(response.getItems()).hasSize(1);
+
+        DeliveryOrderResponse.DeliveryItemResponse item =
+            response.getItems().get(0);
+
+        assertThat(item.productId()).isEqualTo(product.getId());
+        assertThat(item.productName()).isEqualTo("TEST_BEAN");
+        assertThat(item.quantity()).isEqualTo(5);
     }
 
     @Test
@@ -118,6 +133,8 @@ class DeliveryServiceTest {
         // 시작 시간 이전 주문 - 조회 대상 제외
         Order beforeStart = new Order(
             "before@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
             LocalDateTime.of(2026, 8, 25, 13, 59)
         );
         beforeStart.addOrderItem(product, 1);
@@ -125,6 +142,8 @@ class DeliveryServiceTest {
         // 시작 시간과 동일한 주문 - 조회 대상 포함
         Order start = new Order(
             "start@test.com",
+            "12345",
+            "서울시 강남구 테스트로 2",
             LocalDateTime.of(2026, 8, 25, 14, 0)
         );
         start.addOrderItem(product, 1);
@@ -132,6 +151,8 @@ class DeliveryServiceTest {
         // 종료 시간 직전 주문 - 조회 대상 포함
         Order beforeEnd = new Order(
             "beforeEnd@test.com",
+            "12345",
+            "서울시 강남구 테스트로 3",
             LocalDateTime.of(2026, 8, 26, 13, 59)
         );
         beforeEnd.addOrderItem(product, 1);
@@ -139,6 +160,8 @@ class DeliveryServiceTest {
         // 종료 시간과 동일한 주문 - 조회 대상 제외
         Order end = new Order(
             "end@test.com",
+            "12345",
+            "서울시 강남구 테스트로 4",
             LocalDateTime.of(2026, 8, 26, 14, 0)
         );
         end.addOrderItem(product, 1);

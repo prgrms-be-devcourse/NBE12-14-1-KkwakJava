@@ -1,8 +1,12 @@
 package com.back.project1_team1.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.back.project1_team1.global.ResourceNotFoundException;
+import com.back.project1_team1.order.dto.OrderItemRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import com.back.project1_team1.order.dto.OrderUpdateRequest;
 import com.back.project1_team1.product.Product;
 import com.back.project1_team1.product.ProductRepository;
 import java.time.LocalDateTime;
@@ -105,4 +109,93 @@ class OrderServiceTest {
         assertThat(responses).hasSize(3);
         assertThat(responses).allMatch(res -> res.email().equals(email));
     }
+    @Test
+    @DisplayName("주문 수정: 배송 마감 전이면 배송지와 상품 목록(수량)이 정상 수정된다")
+    void modifyOrder_success() {
+        // given
+        Product product = productRepository.save(new Product("새로운 원두", 8000));
+
+        Order order = new Order("modify@test.com", "12345", "기존 주소", LocalDateTime.now());
+        order.addOrderItem(product, 1);
+        Order savedOrder = orderRepository.save(order);
+
+        OrderUpdateRequest updateRequest = new OrderUpdateRequest(
+            "54321",
+            "수정된 주소",
+            List.of(new OrderItemRequest(product.getId(), 5))
+        );
+
+        // when
+        OrderResponse response = orderService.modifyOrder(savedOrder.getId(), updateRequest);
+
+        // then
+        assertThat(response.postalCode()).isEqualTo("54321");
+        assertThat(response.address()).isEqualTo("수정된 주소");
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).quantity()).isEqualTo(5);
+        assertThat(response.totalAmount()).isEqualTo(40000);
+    }
+
+    @Test
+    @DisplayName("주문 수정 실패: 이미 배송 마감된 주문은 수정 시 IllegalStateException이 발생한다")
+    void modifyOrder_fail_alreadyDelivered() {
+        // given: 2일 전 주문 (배송 마감 시간 경과)
+        Product product = productRepository.save(new Product("테스트 원두", 5000));
+        Order order = new Order("delivered@test.com", "12345", "기존 주소", LocalDateTime.now().minusDays(2));
+        order.addOrderItem(product, 1);
+        Order savedOrder = orderRepository.save(order);
+
+        OrderUpdateRequest updateRequest = new OrderUpdateRequest(
+            "54321",
+            "수정된 주소",
+            List.of(new OrderItemRequest(product.getId(), 2))
+        );
+
+        // when & then
+        assertThatThrownBy(() -> orderService.modifyOrder(savedOrder.getId(), updateRequest))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("이미 배송된 주문이라 수정할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("주문 수정 실패: 존재하지 않는 주문 ID인 경우 ResourceNotFoundException이 발생한다")
+    void modifyOrder_fail_notFound() {
+        // given
+        Product product = productRepository.save(new Product("테스트 원두", 5000));
+        OrderUpdateRequest updateRequest = new OrderUpdateRequest(
+            "54321",
+            "수정된 주소",
+            List.of(new OrderItemRequest(product.getId(), 2))
+        );
+
+        // when & then
+        assertThatThrownBy(() -> orderService.modifyOrder(999999L, updateRequest))
+            .isInstanceOf(ResourceNotFoundException.class);
+    }
+    @Test
+    @DisplayName("통합 조회: 이메일이 전달되면 해당 이메일의 주문만 필터링되어 반환된다")
+    void getOrder_withEmail() {
+        // given
+        String email = "test1@test.com";
+
+        // when
+        List<OrderResponse> responses = orderService.getOrders(email);
+
+        // then
+        assertThat(responses).hasSize(2);
+        assertThat(responses).allMatch(res -> res.email().equals(email));
+    }
+
+    @Test
+    @DisplayName("통합 조회: 이메일이 null이거나 공백이면 전체 주문(10건)이 반환된다")
+    void getOrder_nullOrBlankEmail_returnsAll() {
+        // when
+        List<OrderResponse> nullResult = orderService.getOrders(null);
+        List<OrderResponse> blankResult = orderService.getOrders("   ");
+
+        // then
+        assertThat(nullResult).hasSize(10);
+        assertThat(blankResult).hasSize(10);
+    }
+
 }

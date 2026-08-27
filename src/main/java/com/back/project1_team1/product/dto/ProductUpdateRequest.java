@@ -5,16 +5,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.web.multipart.MultipartFile;
 
-public record ProductCreateRequest(
+public record ProductUpdateRequest(
 
-        @NotBlank(message = "상품 이름은 필수입니다.")
+        @NotBlank(message = "수정할 상품 이름은 필수입니다.")
         String name,
 
-        @NotNull(message = "상품 가격은 필수입니다.")
-        @PositiveOrZero(message = "상품 가격은 0 이상이여야 합니다.")
+        @NotNull(message = "수정할 상품 가격은 필수입니다.")
+        @PositiveOrZero(message = "수정할 상품 가격은 0 이상이여야 합니다.")
         Integer price,
 
-        String  imageUrl
+        String imageUrl
 ) {
-
 }

@@ -3,6 +3,7 @@ package com.back.project1_team1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.Order;
 import com.back.project1_team1.order.OrderItem;
 import com.back.project1_team1.order.OrderItemRepository;
@@ -103,11 +104,30 @@ public class OrderCreateTest {
 
         // when & then
         assertThatThrownBy(() -> orderService.createOrder(request))
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(ResourceNotFoundException.class)
             .hasMessageContaining("존재하지 않는 상품입니다");
 
         // 주문과 주문상품이 추가되지 않았는지 확인
         assertThat(orderRepository.count()).isEqualTo(beforeOrderCount);
         assertThat(orderItemRepository.count()).isEqualTo(beforeOrderItemCount);
+    }
+
+    @Test
+    @DisplayName("동일한 상품을 중복하여 주문하면 예외가 발생한다")
+    void createOrder_duplicateProduct_fail() {
+
+        OrderCreateRequest request = new OrderCreateRequest(
+            "test@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
+            List.of(
+                new OrderItemRequest(product1.getId(), 2),
+                new OrderItemRequest(product1.getId(), 3)
+            )
+        );
+
+        assertThatThrownBy(() -> orderService.createOrder(request))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("동일한 상품을 중복하여 주문할 수 없습니다.");
     }
 }

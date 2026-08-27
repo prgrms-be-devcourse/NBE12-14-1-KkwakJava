@@ -8,11 +8,6 @@ spring:
     ansi:
       enabled: always
 
-  mvc:
-    hiddenmethod:
-      filter:
-        enabled: true
-
   jpa:
     properties:
       hibernate:
