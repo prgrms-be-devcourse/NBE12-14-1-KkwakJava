@@ -71,6 +71,7 @@ public class ProductController {
     // 상품 삭제
     // DELETE /products/{id}
     @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(
             @PathVariable Long id
     ) {

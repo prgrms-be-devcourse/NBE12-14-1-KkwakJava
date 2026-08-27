@@ -1,5 +1,6 @@
 package com.back.project1_team1.product;
 
+import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.product.dto.ProductCreateRequest;
 import com.back.project1_team1.product.dto.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,9 @@ public class ProductService {
     public Product getProduct(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException( "존재하지 않는 상품입니다. id = " + id)
+                        new ResourceNotFoundException(
+                                "존재하지 않는 상품입니다. id = " + id
+                        )
                 );
     }
 
@@ -49,7 +52,9 @@ public class ProductService {
 
         Product product = productRepository.findById(id)
                         .orElseThrow(() ->
-                                new IllegalArgumentException( "존재하지 않는 상품입니다. id = " + id)
+                                new ResourceNotFoundException(
+                                        "존재하지 않는 상품입니다. id = " + id
+                                )
                         );
 
         product.update(
@@ -66,7 +71,9 @@ public class ProductService {
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("존재하지 않는 상품입니다. id = " + id)
+                        new ResourceNotFoundException(
+                                "존재하지 않는 상품입니다. id = " + id
+                        )
                 );
 
         productRepository.delete(product);
