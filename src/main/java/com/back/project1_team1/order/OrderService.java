@@ -1,8 +1,10 @@
 package com.back.project1_team1.order;
 
+import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderItemRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
+import com.back.project1_team1.order.dto.OrderUpdateRequest;
 import com.back.project1_team1.product.Product;
 import com.back.project1_team1.product.ProductRepository;
 import java.time.LocalDateTime;
@@ -79,6 +81,38 @@ public class OrderService {
 
         return OrderResponse.from(savedOrder);
     }
+
+    // 주문 수정
+    @Transactional
+    public OrderResponse modifyOrder(Long orderId, OrderUpdateRequest request) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 주문입니다. id=" + orderId));
+
+        // 배송 마감 여부 체크
+        if (order.isAlreadyDelivered(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 배송된 주문이라 수정할 수 없습니다.");
+        }
+
+        // 배송지 수정
+        order.updateDeliveryAddress(request.postalCode(), request.address());
+
+        // 주문 상품 목록 갱신
+        order.clearOrderItems();
+
+        for (OrderItemRequest itemRequest : request.items()) {
+            Product product = productRepository.findById(itemRequest.productId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "존재하지 않는 상품입니다. id=" + itemRequest.productId()));
+
+            order.addOrderItem(product, itemRequest.quantity());
+        }
+
+        // 새 OrderItem의 ID를 생성하고 수정 내용을 DB에 즉시 반영한 후 응답하기 위해 flush
+        orderRepository.flush();
+
+        return OrderResponse.from(order);
+    }
+
 
     //단건 삭제
     @Transactional
