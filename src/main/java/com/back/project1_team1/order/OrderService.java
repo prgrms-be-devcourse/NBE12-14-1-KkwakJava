@@ -50,6 +50,16 @@ public class OrderService {
     @Transactional // 주문 생성 전체를 한 작업 단위로 묶기
     public OrderResponse createOrder(OrderCreateRequest request) {
 
+        // 동일한 상품이 주문 목록에 중복되어 있는지 검사
+        long distinctProductCount = request.items().stream()
+            .map(OrderItemRequest::productId)
+            .distinct()
+            .count();
+
+        if (distinctProductCount != request.items().size()) {
+            throw new IllegalArgumentException("동일한 상품을 중복하여 주문할 수 없습니다.");
+        }
+
         // 요청 DTO의 고객 정보와 현재 서버 시각으로 주문 생성
         Order order = new Order(
             request.email(),
@@ -65,7 +75,7 @@ public class OrderService {
             Product product = productRepository
                 .findById(itemRequest.productId())
                 .orElseThrow(() ->
-                    new IllegalArgumentException(
+                    new ResourceNotFoundException(
                         "존재하지 않는 상품입니다. id = " + itemRequest.productId()
                     )
                 );
