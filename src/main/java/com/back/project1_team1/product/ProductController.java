@@ -6,6 +6,7 @@ import com.back.project1_team1.product.dto.ProductResponse;
 import com.back.project1_team1.product.dto.ProductUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ProductController {
     // 상품 등록
     // POST /products
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse createProduct(
             @Valid @RequestBody ProductCreateRequest request
     ) {
@@ -69,6 +71,7 @@ public class ProductController {
     // 상품 삭제
     // DELETE /products/{id}
     @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(
             @PathVariable Long id
     ) {
