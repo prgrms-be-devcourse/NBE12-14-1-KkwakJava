@@ -13,7 +13,7 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     // 에러 응답용 표준 Record DTO
-    public record ErrorResponse(int status, String error, Object message) {
+    public record ErrorResponse(int status, String error, List<String> message) {
     }
 
     // 400 BAD_REQUEST: DTO Validation(@Valid) 검증 실패
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(
                 404,
                 "NOT_FOUND",
-                e.getMessage()
+                List.of(e.getMessage())
             ));
     }
 
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(
                 400,
                 "BAD_REQUEST",
-                e.getMessage()
+                List.of(e.getMessage())
             ));
     }
 
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(
                 409,
                 "CONFLICT",
-                e.getMessage()
+                List.of(e.getMessage())
             ));
     }
 
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(
                 500,
                 "INTERNAL_SERVER_ERROR",
-                "서버 내부 오류가 발생했습니다."
+                List.of("서버 내부 오류가 발생했습니다.")
             ));
     }
 }
