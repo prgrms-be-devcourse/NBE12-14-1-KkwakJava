@@ -57,37 +57,16 @@ public class OrderController {
     //단건 삭제
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
-        try {
-            orderService.deleteOrder(orderId);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            // orderId에 해당하는 주문이 존재하지 않는 경우 (OrderService.deleteOrder)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", e.getMessage()));
-        } catch (IllegalStateException e) {
-            // 배송 마감 시간이 지나 이미 배송된 주문인 경우 (OrderService.deleteOrder)
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("message", e.getMessage()));
-        }
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.noContent().build();
     }
 
     //다건삭제
     @DeleteMapping
     public ResponseEntity<?> deleteOrders(
         @RequestParam List<Long> orderIds) {
-
-        try {
-            orderService.deleteOrders(orderIds);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            // orderIds가 비어있거나, 존재하지 않는 주문 id가 포함된 경우 (OrderService.deleteOrders)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", e.getMessage()));
-        } catch (IllegalStateException e) {
-            // 배송 마감 시간이 지나 이미 배송된 주문이 포함된 경우 (OrderService.deleteOrders)
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("message", e.getMessage()));
-        }
+        orderService.deleteOrders(orderIds);
+        return ResponseEntity.noContent().build();
     }
 
 }
