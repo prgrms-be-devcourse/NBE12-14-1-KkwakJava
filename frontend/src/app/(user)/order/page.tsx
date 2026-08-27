@@ -207,60 +207,69 @@ export default function OrderPage() {
   };
 
   return (
-      <main className="min-h-screen bg-[#F6F5F2] text-[#2B2523]">
+      <main className="min-h-screen bg-[#F6F5F2] text-[#2b2420] dark:bg-[#201812] dark:text-[#f3e9dc]">
+        <div className="px-6 pt-5 pb-8 sm:px-12">
+          <div className="mx-auto w-full max-w-6xl">
+            {/* 페이지 제목 */}
+            <div className="mb-5 flex items-center gap-4">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F6F4F0] text-[#4E2D1D] dark:bg-[#3d2e22] dark:text-[#e8c9a0]">
+            <span aria-hidden="true" className="text-2xl">
+              ☕
+            </span>
+          </span>
 
-        {/* 페이지 내용 */}
-        <div className="mx-auto max-w-7xl px-6 py-10">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#4E2D1D]">
-              원두 주문
-            </h1>
+              <div>
+                <h1 className="text-2xl font-bold">
+                  원두 주문
+                </h1>
 
-            <p className="mt-2 text-sm text-[#8C857B]">
-              원하는 원두를 장바구니에 담고 주문 정보를 입력해 주세요.
-            </p>
+                <p className="text-sm text-[#8a7d70]">
+                  원하는 원두를 선택하고 배송 정보를 입력해 주세요.
+                </p>
+              </div>
+            </div>
+
+            {loading ? (
+                <div className="rounded-2xl border border-[#E9E5DC] bg-white p-10 text-center text-sm text-[#8a7d70] shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
+                  상품을 불러오는 중입니다.
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(380px,1fr)] xl:gap-8">
+                  {/* 왼쪽 상품 목록 */}
+                  <ProductList
+                      products={products}
+                      onAdd={addToCart}
+                  />
+
+                  {/* 오른쪽 주문 영역 */}
+                  <section className="min-w-0 rounded-2xl border border-[#E9E5DC] bg-white p-6 shadow-sm dark:border-[#4a3b2f] dark:bg-[#2b211a]">
+                    <Cart
+                        cart={cart}
+                        onIncrease={increaseQuantity}
+                        onDecrease={decreaseQuantity}
+                        onRemove={removeFromCart}
+                    />
+
+                    <OrderForm
+                        email={email}
+                        postalCode={postalCode}
+                        address={address}
+                        totalAmount={totalAmount}
+                        onEmailChange={setEmail}
+                        onPostalCodeChange={setPostalCode}
+                        onAddressChange={setAddress}
+                        onSubmit={submitOrder}
+                    />
+
+                    {message && (
+                        <div className="mt-5 rounded-lg bg-[#F6F4F0] px-4 py-3 text-sm font-medium text-[#4E2D1D] dark:bg-[#332720] dark:text-[#e8c9a0]">
+                          {message}
+                        </div>
+                    )}
+                  </section>
+                </div>
+            )}
           </div>
-
-          {loading ? (
-              <div className="rounded-xl border border-[#E9E5DC] bg-white p-10 text-center text-sm text-[#8C857B]">
-                상품을 불러오는 중입니다.
-              </div>
-          ) : (
-              <div className="flex items-start gap-8">
-                {/* 왼쪽 상품 목록 */}
-                <ProductList
-                    products={products}
-                    onAdd={addToCart}
-                />
-
-                {/* 오른쪽 주문 영역 */}
-                <section className="min-w-0 flex-1 rounded-xl border border-[#E9E5DC] bg-white p-7">
-                  <Cart
-                      cart={cart}
-                      onIncrease={increaseQuantity}
-                      onDecrease={decreaseQuantity}
-                      onRemove={removeFromCart}
-                  />
-
-                  <OrderForm
-                      email={email}
-                      postalCode={postalCode}
-                      address={address}
-                      totalAmount={totalAmount}
-                      onEmailChange={setEmail}
-                      onPostalCodeChange={setPostalCode}
-                      onAddressChange={setAddress}
-                      onSubmit={submitOrder}
-                  />
-
-                  {message && (
-                      <div className="mt-5 rounded-lg bg-[#F6F4F0] px-4 py-3 text-sm font-medium text-[#4E2D1D]">
-                        {message}
-                      </div>
-                  )}
-                </section>
-              </div>
-          )}
         </div>
       </main>
   );

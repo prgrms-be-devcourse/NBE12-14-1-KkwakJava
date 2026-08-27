@@ -37,8 +37,9 @@ export default function OrderForm({
         </div>
 
         <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold text-[#2B2523]">
-            이메일
+          <label className="text-sm font-medium text-[#8a7d70]">
+            <span className="pl-2">이메일</span>
+
             <input
                 type="email"
                 value={email}
@@ -48,8 +49,9 @@ export default function OrderForm({
             />
           </label>
 
-          <label className="text-sm font-semibold text-[#2B2523]">
-            우편번호
+          <label className="text-sm font-medium text-[#8a7d70]">
+            <span className="pl-2">우편번호</span>
+
             <input
                 type="text"
                 value={postalCode}
@@ -59,8 +61,9 @@ export default function OrderForm({
             />
           </label>
 
-          <label className="text-sm font-semibold text-[#2B2523]">
-            주소
+          <label className="text-sm font-medium text-[#8a7d70]">
+            <span className="pl-2">주소</span>
+
             <input
                 type="text"
                 value={address}
