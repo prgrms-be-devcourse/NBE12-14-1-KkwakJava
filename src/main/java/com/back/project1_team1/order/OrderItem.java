@@ -32,4 +32,8 @@ public class OrderItem {
         this.product = product;
         this.quantity = quantity;
     }
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }

@@ -69,4 +69,14 @@ public class Order {
         return !now.isBefore(deliveredAt);
     }
 
+    public void updateDeliveryAddress(String postalCode, String address){
+        this.postalCode = postalCode;
+        this.address = address;
+    }
+    public void clearOrderItems(){
+        this.orderItems.clear();
+    }
+
+
+
 }
