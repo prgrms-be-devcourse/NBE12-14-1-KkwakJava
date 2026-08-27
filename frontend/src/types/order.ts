@@ -28,3 +28,10 @@ export interface OrderUpdateRequest {
   address: string;
   items: OrderItemRequest[];
 }
+
+export interface OrderCreateRequest {
+  email: string;
+  postalCode: string;
+  address: string;
+  items: OrderItemRequest[];
+}
