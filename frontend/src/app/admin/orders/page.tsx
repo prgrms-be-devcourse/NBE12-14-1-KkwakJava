@@ -38,6 +38,12 @@ export default function AdminOrdersPage() {
     fetchOrders(searchEmail);
   };
 
+  // 전체 조회 핸들러 (검색어 초기화 후 전체 목록 요청)
+  const handleResetSearch = () => {
+    setSearchEmail('');
+    fetchOrders();
+  };
+
   const handleUpdate = async (orderId: number, data: OrderUpdateRequest) => {
     const updated = await updateOrder(orderId, data);
     alert('배송지 정보가 성공적으로 수정되었습니다.');
@@ -142,6 +148,14 @@ export default function AdminOrdersPage() {
               />
               <button type="submit" style={primaryBtnStyle} disabled={loading}>
                 {loading ? '조회 중...' : '조회하기'}
+              </button>
+              <button
+                  type="button"
+                  onClick={handleResetSearch}
+                  style={secondaryBtnStyle}
+                  disabled={loading}
+              >
+                전체 조회
               </button>
             </form>
           </div>
@@ -335,6 +349,17 @@ const primaryBtnStyle: React.CSSProperties = {
   color: '#ffffff',
   border: 'none',
   padding: '10px 0',
+  borderRadius: 6,
+  fontWeight: 600,
+  fontSize: 13,
+  cursor: 'pointer',
+};
+
+const secondaryBtnStyle: React.CSSProperties = {
+  backgroundColor: '#f6f4f0',
+  color: '#4a443f',
+  border: '1px solid #dfdad0',
+  padding: '9px 0',
   borderRadius: 6,
   fontWeight: 600,
   fontSize: 13,
