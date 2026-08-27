@@ -14,6 +14,6 @@ public record ProductUpdateRequest(
         @PositiveOrZero(message = "수정할 상품 가격은 0 이상이여야 합니다.")
         Integer price,
 
-        MultipartFile image
+        String imageUrl
 ) {
 }
