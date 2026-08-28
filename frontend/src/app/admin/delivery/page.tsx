@@ -18,9 +18,7 @@ export default function AdminDeliveryPage() {
     return (
         `${date.getFullYear()}. ` +
         `${String(date.getMonth() + 1).padStart(2, '0')}. ` +
-        `${String(date.getDate()).padStart(2, '0')} ` +
-        `${String(date.getHours()).padStart(2, '0')}:` +
-        `${String(date.getMinutes()).padStart(2, '0')}`
+        `${String(date.getDate()).padStart(2, '0')} `
     );
   };
 
@@ -170,8 +168,10 @@ export default function AdminDeliveryPage() {
                               주문번호 #{String(order.deliveryId).padStart(3, '0')}
                             </strong>
                             <div className="h-4 w-px bg-[#E9E5DC]" />
-                            <span className="text-xs text-[#8C857B]">주문일</span>
-                            <span className="text-sm font-semibold text-[#2B2523]">{formatOrderDate(order.orderDate)}</span>
+                            <span className="text-xs text-[#8C857B]">마지막 주문일</span>
+                            <span className="text-sm font-semibold text-[#2B2523]">
+                              {formatOrderDate(order.orderDate)}
+                            </span>
                           </div>
 
                           {order.deliveryCompleted && (
