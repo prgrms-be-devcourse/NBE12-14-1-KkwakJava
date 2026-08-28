@@ -1,9 +1,9 @@
-import type { Product } from '@/types/product'
-import ProductItem from './ProductItem'
+import ProductItem from './ProductItem';
+import type { ProductResponse } from '@/types/product';
 
 interface ProductListProps {
-  products: Product[]
-  onAdd: (product: Product) => void
+  products: ProductResponse[];
+  onAdd: (product: ProductResponse) => void;
 }
 
 export default function ProductList({
