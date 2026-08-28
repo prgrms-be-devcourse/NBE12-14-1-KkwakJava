@@ -1,5 +1,6 @@
 package com.back.project1_team1;
 
+import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.Order;
 import com.back.project1_team1.order.OrderRepository;
 import com.back.project1_team1.order.OrderService;
@@ -59,7 +60,7 @@ class DeleteTest {
         Long notExistId = 999999L;
 
         assertThatThrownBy(() -> orderService.deleteOrder(notExistId))
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(ResourceNotFoundException.class)
             .hasMessageContaining("존재하지 않는 주문입니다");
     }
 
