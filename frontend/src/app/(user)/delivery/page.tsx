@@ -65,6 +65,12 @@ function groupOrdersByDeliveryWindow(orders: OrderResponse[]): DeliveryGroup[] {
     }
   })
 
+  map.forEach((group) => {
+    group.orders.sort(
+      (a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime(),
+    )
+  })
+
   return Array.from(map.values()).sort((a, b) => b.windowEnd.getTime() - a.windowEnd.getTime())
 }
 
