@@ -78,7 +78,7 @@ export default function AdminDeliveryPage() {
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F6F5F2] text-2xl">🚚</div>
           <div>
             <h1 className="text-2xl font-bold text-[#2B2523]">배송 관리</h1>
-            <p className="mt-1 text-sm text-[#8C857B]">배송 대상 주문을 확인하세요.</p>
+            <p className="mt-1 text-sm text-[#8C857B]">배송 내역을 확인하세요.</p>
           </div>
         </div>
 
@@ -281,12 +281,6 @@ export default function AdminDeliveryPage() {
                   </div>
               )}
 
-              {/* 안내 */}
-              {orders.length > 0 && (
-                  <p className="mt-5 text-xs text-[#A0998F]">
-                    ⓘ 배송 대상은 전날 오후 2시부터 당일 오후 2시 이전 주문을 기준으로 조회됩니다.
-                  </p>
-              )}
             </div>
           </section>
         </div>
