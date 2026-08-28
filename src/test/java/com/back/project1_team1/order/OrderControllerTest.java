@@ -192,7 +192,7 @@ class OrderControllerTest {
 
         // given: 주문할 상품을 테스트 DB에 먼저 저장
         Product product = productRepository.save(
-            new Product("Colombia Narino", 5000)
+            new Product("Colombia Narino", 5000, null)
         );
 
         String requestJson = """
@@ -231,7 +231,7 @@ class OrderControllerTest {
 
         // given : 주문할 상품을 DB에 저장
         Product product = productRepository.save(
-            new Product("Colombia Narino", 5000)
+            new Product("Colombia Narino", 5000, null)
         );
 
         String requestJson = """
@@ -353,7 +353,7 @@ class OrderControllerTest {
     @DisplayName("정상적인 주문 수정 요청은 200 OK와 함께 수정된 정보를 반환한다")
     void modifyOrder_success() throws Exception {
         // given
-        Product product = productRepository.save(new Product("Colombia Narino", 5000));
+        Product product = productRepository.save(new Product("Colombia Narino", 5000, null));
         Order order = new Order("test@test.com", "12345", "서울시 강남구", LocalDateTime.now());
         order.addOrderItem(product, 1);
         Order savedOrder = orderRepository.save(order);

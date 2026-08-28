@@ -46,11 +46,11 @@ public class OrderCreateTest {
     void setUp(){
 
         product1 = productRepository.save(
-            new Product("Columnbia Narino", 5000)
+            new Product("Columnbia Narino", 5000, null)
         );
 
         product2 = productRepository.save(
-            new Product("Ethiopia Sidamo", 7000)
+            new Product("Ethiopia Sidamo", 7000, null)
         );
     }
 

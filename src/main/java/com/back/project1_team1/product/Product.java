@@ -6,8 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 
 @Entity
-@Table(name = "products")
 @Getter
+@Table(
+        name = "products",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "name")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
 
@@ -15,6 +20,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 +1
     private Long id;
 
+    @Column(unique = true)
     private String name; // 상품명
 
     private int price; // 상품 가격

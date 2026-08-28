@@ -5,7 +5,7 @@ import type {
 } from '@/types/product';
 
 const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 const BASE_URL = `${API_BASE_URL}/products`;
 
@@ -33,15 +33,16 @@ export const createProduct = async (
   });
 
   if (!res.ok) {
-    throw new Error('상품 등록에 실패했습니다.');
+    const error = await res.json();
+    throw new Error(error.message?.[0] ?? '상품 등록에 실패했습니다.');
   }
 
   return res.json();
 };
 
 export const updateProduct = async (
-    id: number,
-    data: ProductUpdateRequest
+  id: number,
+  data: ProductUpdateRequest
 ): Promise<ProductResponse> => {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: 'PUT',
@@ -52,7 +53,8 @@ export const updateProduct = async (
   });
 
   if (!res.ok) {
-    throw new Error('상품 수정에 실패했습니다.');
+    const error = await res.json();
+    throw new Error(error.message?.[0] ?? '상품 수정에 실패했습니다.');
   }
 
   return res.json();
