@@ -1,4 +1,4 @@
-import type { DeliveryOrderResponse } from '@/types/delivery';
+import type {DeliveryOrderResponse} from '@/types/delivery';
 
 const BASE_URL = 'http://localhost:8080/orders/merged';
 
@@ -14,14 +14,12 @@ const extractErrorMessage = async (
       if (Array.isArray(data.message)) {
         return data.message.join(', ');
       }
-
       return data.message;
     }
 
     if (data?.error) {
       return data.error;
     }
-
   } catch {
     try {
       const text = await res.text();
@@ -29,7 +27,6 @@ const extractErrorMessage = async (
       if (text) {
         return text;
       }
-
     } catch {
     }
   }
@@ -38,25 +35,19 @@ const extractErrorMessage = async (
 };
 
 // 배송 전체 조회
-export const getDeliveryOrders =
-    async (): Promise<DeliveryOrderResponse[]> => {
+export const getDeliveryOrders = async (): Promise<DeliveryOrderResponse[]> => {
+  const res = await fetch(BASE_URL, {
+    cache: 'no-store',
+  });
 
-      const res = await fetch(
-          BASE_URL,
-          {
-            cache: 'no-store',
-          }
-      );
+  if (!res.ok) {
+    const errorMsg = await extractErrorMessage(
+        res,
+        '배송 목록을 불러오는데 실패했습니다.'
+    );
 
-      if (!res.ok) {
-        const errorMsg =
-            await extractErrorMessage(
-                res,
-                '배송 목록을 불러오는데 실패했습니다.'
-            );
+    throw new Error(errorMsg);
+  }
 
-        throw new Error(errorMsg);
-      }
-
-      return res.json();
-    };
+  return res.json();
+};
