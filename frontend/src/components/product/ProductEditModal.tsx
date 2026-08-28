@@ -9,7 +9,7 @@ type Props = {
     onSave: (id: number, data: ProductUpdateRequest) => Promise<void>;
 };
 
-// 💡 이미지 유효성 검사 함수
+// 이미지 유효성 검사 함수
 const checkValidImage = (url: string): Promise<boolean> => {
     return new Promise((resolve) => {
         const img = new Image();
@@ -52,7 +52,7 @@ export default function ProductEditModal({
 
         const trimmedImageUrl = imageUrl.trim();
 
-        // 💡 1. 이미지 검증 (입력된 경우만 실행)
+        // 잘못된 URL 입력 시 검증
         if (trimmedImageUrl !== '') {
             setIsSubmitting(true);
             const isValid = await checkValidImage(trimmedImageUrl);
@@ -63,12 +63,12 @@ export default function ProductEditModal({
                     '입력하신 이미지 URL을 불러올 수 없습니다.\n' +
                     '올바른 이미지 주소를 입력하거나, 빈칸으로 두시면 기본 이미지가 사용됩니다.'
                 );
-                onClose(); // URL 검증 실패 시에도 모달 닫기
+                // 💡 onClose()를 없애고, 이미지 URL만 비워서 모달을 유지합니다!
+                setImageUrl('');
                 return;
             }
         }
 
-        // 💡 2. 수정 API 요청
         try {
             setIsSubmitting(true);
             await onSave(product.id, {
@@ -77,11 +77,12 @@ export default function ProductEditModal({
                 imageUrl: trimmedImageUrl,
             });
 
-            onClose(); // 성공 시 모달 닫기
+            // 💡 저장 성공했을 때만 모달을 닫습니다.
+            onClose();
             alert('상품 정보가 수정되었습니다.');
         } catch (err) {
             console.error(err);
-            onClose(); // 실패 시 모달 닫기
+            // 백엔드 요청 실패 시에도 모달을 닫지 않고 경고창만 띄워 수정을 이어갈 수 있게 함
             alert(
                 err instanceof Error
                     ? err.message
@@ -137,8 +138,8 @@ export default function ProductEditModal({
                     </label>
                     <input
                         type="text"
-                        value={imageUrl}
                         placeholder="https://example.com/image.jpg"
+                        value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
                         className="rounded-xl border border-[#d9d4cb] bg-white px-4 py-3 text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
                     />

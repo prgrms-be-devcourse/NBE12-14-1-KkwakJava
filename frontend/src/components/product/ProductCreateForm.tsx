@@ -8,7 +8,7 @@ type Props = {
     onCreated: (product: ProductResponse) => void;
 };
 
-// 💡 이미지 유효성 검사 함수 (3초 타임아웃 적용)
+// 이미지 유효성 검사 함수
 const checkValidImage = (url: string): Promise<boolean> => {
     return new Promise((resolve) => {
         const img = new Image();
@@ -37,11 +37,17 @@ export default function ProductCreateForm({ onCreated }: Props) {
         setIsPreviewError(false);
     }, [imageUrl]);
 
-    // 💡 입력 폼 초기화 함수
-    const resetForm = () => {
+    // 💡 1. 성공 시 전체를 비우는 함수
+    const resetAllFields = () => {
         setName('');
         setPrice('');
         setImageUrl('');
+    };
+
+    // 💡 2. URL 검증 실패 시 '이미지 URL만' 비우는 함수
+    const resetImageUrl = () => {
+        setImageUrl('');
+        setIsPreviewError(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -65,7 +71,7 @@ export default function ProductCreateForm({ onCreated }: Props) {
 
         const trimmedImageUrl = imageUrl.trim();
 
-        // 💡 1. URL이 입력된 경우에만 유효성 검증 (빈값이면 통과)
+        // 잘못된 URL 입력 시 검증
         if (trimmedImageUrl !== '') {
             setIsSubmitting(true);
             const isValid = await checkValidImage(trimmedImageUrl);
@@ -76,12 +82,12 @@ export default function ProductCreateForm({ onCreated }: Props) {
                     '입력하신 이미지 URL을 불러올 수 없습니다.\n' +
                     '올바른 이미지 주소를 입력하거나, 빈칸으로 두시면 기본 이미지가 사용됩니다.'
                 );
-                resetForm(); // 잘못된 URL 입력 시에도 폼 비우기
+                // 💡 상품명과 가격은 놔두고, URL만 싹 지워줍니다!
+                resetImageUrl();
                 return;
             }
         }
 
-        // 💡 2. 등록 API 요청
         try {
             setIsSubmitting(true);
             const product = await createProduct({
@@ -91,11 +97,13 @@ export default function ProductCreateForm({ onCreated }: Props) {
             });
 
             onCreated(product);
-            resetForm(); // 성공 시 초기화
+
+            // 💡 등록에 '최종 성공'했을 때만 전체 필드 비우기
+            resetAllFields();
             alert('상품이 등록되었습니다.');
         } catch (err) {
             console.error(err);
-            resetForm(); // 실패 시 초기화
+            // API 서버 통신 실패 등의 예외 시에는 작성 중이던 입력을 지우지 않고 유지
             alert(
                 err instanceof Error
                     ? err.message
@@ -107,7 +115,7 @@ export default function ProductCreateForm({ onCreated }: Props) {
     };
 
     return (
-        <div className="flex w-[420px] flex-col justify-between rounded-3xl border border-[#e9e5dc] bg-white px-9 py-10 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+        <div className="flex w-[420px] flex-col justify-between rounded-3xl border border-[#e9e5dc] bg-[#ffffff] px-9 py-10 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
             <div>
                 <h2 className="mb-2 text-xl font-bold text-[#2b2523]">상품 등록</h2>
                 <p className="mb-7 mt-0 text-sm text-[#8c857b]">새 원두 상품 정보를 입력해 주세요.</p>
@@ -119,7 +127,7 @@ export default function ProductCreateForm({ onCreated }: Props) {
                         placeholder="상품명을 입력하세요"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="rounded-xl border border-[#d9d4cb] bg-white px-4 py-[13px] text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
+                        className="rounded-xl border border-[#d9d4cb] bg-[#ffffff] px-4 py-[13px] text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
                     />
 
                     <label className="mt-2.5 text-sm font-semibold text-[#444]">가격</label>
@@ -131,7 +139,7 @@ export default function ProductCreateForm({ onCreated }: Props) {
                             max="2000000000"
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
-                            className="w-full rounded-xl border border-[#d9d4cb] bg-white py-[13px] pl-9 pr-9 text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
+                            className="w-full rounded-xl border border-[#d9d4cb] bg-[#ffffff] py-[13px] pl-9 pr-9 text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
                         />
                         <span className="pointer-events-none absolute right-4 text-sm text-[#888]">원</span>
                     </div>
@@ -142,7 +150,7 @@ export default function ProductCreateForm({ onCreated }: Props) {
                         placeholder="https://example.com/image.jpg"
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
-                        className="rounded-xl border border-[#d9d4cb] bg-white px-4 py-[13px] text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
+                        className="rounded-xl border border-[#d9d4cb] bg-[#ffffff] px-4 py-[13px] text-[15px] text-[#2b2523] outline-none transition focus:border-[#4e2d1d]"
                     />
 
                     <div className="mt-2.5 flex h-40 w-full items-center justify-center overflow-hidden rounded-2xl border border-[#e9e5dc] bg-[#faf9f7]">
@@ -161,6 +169,7 @@ export default function ProductCreateForm({ onCreated }: Props) {
                             </div>
                         ) : (
                             <div className="px-5 text-center">
+                                <span className="mb-2 block text-3xl">☕</span>
                                 <span className="block text-[13px] font-semibold text-[#6d665e]">
                                     이미지 미리보기
                                 </span>
