@@ -54,9 +54,13 @@ export default function OrderForm({
 
             <input
                 type="text"
+                inputMode="numeric"
+                maxLength={5}
                 value={postalCode}
-                onChange={(e) => onPostalCodeChange(e.target.value)}
-                placeholder="우편번호를 입력하세요"
+                onChange={(e) =>
+                    onPostalCodeChange(e.target.value.replace(/\D/g, ''))
+                }
+                placeholder="12345"
                 className={inputClass}
             />
           </label>

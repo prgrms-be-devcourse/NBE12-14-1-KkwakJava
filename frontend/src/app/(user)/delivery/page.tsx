@@ -116,6 +116,39 @@ export default function DeliveryPage() {
       })
   }, [])
 
+  // 주문 완료 시 주문 내역 자동 조회
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const emailFromQuery = params.get('email')
+
+    if (!emailFromQuery) {
+      return
+    }
+
+    const loadOrders = async () => {
+      setEmail(emailFromQuery)
+      setLoading(true)
+      setError(null)
+
+      try {
+        const data = await getOrders(emailFromQuery)
+        setOrders(data)
+        setSearched(true)
+      } catch (err) {
+        setError(
+            err instanceof Error
+                ? err.message
+                : '주문 조회에 실패했습니다.'
+        )
+        setOrders([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadOrders()
+  }, [])
+
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault()
 
@@ -287,21 +320,6 @@ export default function DeliveryPage() {
 
   return (
     <div className="min-h-screen bg-[#F6F5F2] text-[#2b2420] dark:bg-[#201812] dark:text-[#f3e9dc]">
-      <header className="flex items-center justify-between border-b border-[#E9E5DC] bg-white px-6 py-4 dark:border-[#4a3b2f] dark:bg-[#2b211a] sm:px-12">
-        <div className="flex items-center gap-2 text-lg font-bold text-[#4E2D1D] dark:text-[#e8c9a0]">
-          <span aria-hidden="true" className="text-xl leading-none">☕️</span>
-          Grids &amp; Circles
-        </div>
-        <nav className="flex gap-6 text-sm">
-          <a href="/order" className="text-[#8a7d70] hover:text-[#2b2420] dark:hover:text-[#f3e9dc]">
-            원두 주문
-          </a>
-          <a href="/delivery" className="border-b-2 border-[#4E2D1D] font-semibold dark:border-[#e8c9a0]">
-            배송 조회
-          </a>
-        </nav>
-      </header>
-
       <div className="px-6 py-8 sm:px-12">
         <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex items-center gap-4">

@@ -5,6 +5,11 @@ import { useEffect, useState } from 'react';
 import { createOrder } from '@/api/orderApi';
 import { getProducts } from '@/api/productApi';
 
+import { useRouter } from 'next/navigation';
+
+import ConfirmModal from '@/components/common/ConfirmModal';
+import OrderSuccessModal from '@/components/order/OrderSuccessModal';
+
 import ProductList from '@/components/order/ProductList';
 import Cart from '@/components/order/Cart';
 import OrderForm from '@/components/order/OrderForm';
@@ -30,6 +35,16 @@ export default function OrderPage() {
 
   // 상품 조회 중인지 여부
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+
+  // 주문할 것인지 재확인
+  const [isOrderConfirmOpen, setIsOrderConfirmOpen] = useState(false);
+  const [isOrderSuccessOpen, setIsOrderSuccessOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 주문 완료한 고객 이메일 저장
+  const [completedOrderEmail, setCompletedOrderEmail] = useState('');
 
   // 페이지 최초 진입 시 상품 조회
   useEffect(() => {
@@ -124,13 +139,24 @@ export default function OrderPage() {
     );
   };
 
-  // 장바구니에서 완전히 삭제
-  const removeFromCart = (productId: number) => {
+  const removeSelectedFromCart = (productIds: number[]) => {
     setCart((currentCart) =>
         currentCart.filter(
-            (item) => item.productId !== productId
+            (item) => !productIds.includes(item.productId)
         )
     );
+  };
+
+  const clearCart = () => {
+    const confirmed = window.confirm(
+        '장바구니에 담긴 상품을 모두 삭제하시겠습니까?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setCart([]);
   };
 
   // 총 주문 금액
@@ -139,12 +165,11 @@ export default function OrderPage() {
       0
   );
 
-  // 주문하기
-  const submitOrder = async () => {
+  // 주문 가능한 상태인지 검사
+  const submitOrder = () => {
     setMessage('');
     setIsError(false);
 
-    // 1. 상품 검증
     if (cart.length === 0) {
       setIsError(true);
       setMessage('주문할 상품을 선택해주세요.');
@@ -161,7 +186,9 @@ export default function OrderPage() {
 
     if (!emailPattern.test(email.trim())) {
       setIsError(true);
-      setMessage('올바른 이메일 형식으로 입력해주세요.\n(example@test.com)');
+      setMessage(
+          '올바른 이메일 형식으로 입력해주세요.\n예: example@test.com'
+      );
       return;
     }
 
@@ -171,18 +198,30 @@ export default function OrderPage() {
       return;
     }
 
+    const postalCodePattern = /^\d{5}$/;
+
+    if (!postalCodePattern.test(postalCode.trim())) {
+      setIsError(true);
+      setMessage('우편번호는 5자리 숫자로 입력해주세요.');
+      return;
+    }
+
     if (!address.trim()) {
       setIsError(true);
       setMessage('주소를 입력해주세요.');
       return;
     }
 
-    // 백엔드 OrderCreateRequest 형태로 변환
+    // 모든 validation 통과 후 주문 확인창 표시
+    setIsOrderConfirmOpen(true);
+  };
+
+  // 진짜 주문할 것인지 확인
+  const confirmOrder = async () => {
     const request: OrderCreateRequest = {
       email: email.trim(),
       postalCode: postalCode.trim(),
       address: address.trim(),
-
       items: cart.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -190,19 +229,28 @@ export default function OrderPage() {
     };
 
     try {
+      setIsSubmitting(true);
+      setMessage('');
+      setIsError(false);
+
       await createOrder(request);
 
-      setIsError(false);
-      setMessage('주문이 완료되었습니다.');
+      setIsOrderConfirmOpen(false);
 
-      // 주문 완료 후 입력값 초기화
+// 방금 주문한 고객 이메일 저장
+      setCompletedOrderEmail(email.trim());
+
+// 입력값 초기화
       setCart([]);
       setEmail('');
       setPostalCode('');
       setAddress('');
+
+      setIsOrderSuccessOpen(true);
     } catch (error) {
       console.error(error);
 
+      setIsOrderConfirmOpen(false);
       setIsError(true);
 
       if (error instanceof Error) {
@@ -210,7 +258,18 @@ export default function OrderPage() {
       } else {
         setMessage('주문 중 오류가 발생했습니다.');
       }
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  // 배송 조회 페이지로 이동
+  const goToDelivery = () => {
+    setIsOrderSuccessOpen(false);
+
+    router.push(
+        `/delivery?email=${encodeURIComponent(completedOrderEmail)}`
+    );
   };
 
   return (
@@ -254,7 +313,7 @@ export default function OrderPage() {
                         cart={cart}
                         onIncrease={increaseQuantity}
                         onDecrease={decreaseQuantity}
-                        onRemove={removeFromCart}
+                        onRemoveSelected={removeSelectedFromCart}
                     />
                   </section>
 
@@ -295,6 +354,24 @@ export default function OrderPage() {
             )}
           </div>
         </div>
+
+        <ConfirmModal
+            isOpen={isOrderConfirmOpen}
+            title="주문 확인"
+            message={`총 ${totalAmount.toLocaleString('ko-KR')}원을 주문하시겠습니까?`}
+            confirmText="주문"
+            variant="primary"
+            isProcessing={isSubmitting}
+            processingText="주문 중..."
+            onConfirm={confirmOrder}
+            onCancel={() => setIsOrderConfirmOpen(false)}
+        />
+
+        <OrderSuccessModal
+            isOpen={isOrderSuccessOpen}
+            onClose={() => setIsOrderSuccessOpen(false)}
+            onViewOrders={goToDelivery}
+        />
       </main>
   );
 }

@@ -1,76 +1,99 @@
-import type { CartItem as CartItemType } from '@/types/product'
+import type { CartItem as CartItemType } from '@/types/product';
 
 interface CartItemProps {
-  item: CartItemType
-  onIncrease: (productId: number) => void
-  onDecrease: (productId: number) => void
-  onRemove: (productId: number) => void
+  item: CartItemType;
+  checked: boolean;
+  onToggle: (productId: number) => void;
+  onIncrease: (productId: number) => void;
+  onDecrease: (productId: number) => void;
 }
 
 export default function CartItem({
                                    item,
+                                   checked,
+                                   onToggle,
                                    onIncrease,
                                    onDecrease,
-                                   onRemove,
                                  }: CartItemProps) {
   const fallbackImage =
-      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&auto=format&fit=crop&q=80';
 
   return (
-      <div className="py-4 first:pt-0 last:pb-0">
-        <div className="flex gap-3">
-          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#F6F4F0] dark:bg-[#3d2e22]">
-            <img
-                src={item.imageUrl || fallbackImage}
-                alt={item.name}
-                className="h-full w-full object-cover"
-            />
-          </div>
+      <div className="flex gap-3 py-4">
+        {/* 체크박스 */}
+        <div className="flex items-start pt-1">
+          <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle(item.productId)}
+              aria-label={`${item.name} 선택`}
+              className="
+            h-4 w-4 cursor-pointer
+            accent-[#4E2D1D]
+          "
+          />
+        </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-3">
-              <strong className="text-sm text-[#2b2420] dark:text-[#f3e9dc]">
-                {item.name}
-              </strong>
+        {/* 이미지 */}
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-[#F6F4F0] dark:bg-[#3d2e22]">
+          <img
+              src={item.imageUrl || fallbackImage}
+              alt={item.name}
+              className="h-full w-full object-cover"
+          />
+        </div>
 
-              <strong className="whitespace-nowrap text-sm text-[#4E2D1D] dark:text-[#e8c9a0]">
-                {(item.price * item.quantity).toLocaleString('ko-KR')}원
-              </strong>
-            </div>
+        {/* 상품 정보 */}
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-[#2b2420] dark:text-[#f3e9dc]">
+            {item.name}
+          </p>
 
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <div className="flex overflow-hidden rounded-lg border border-[#E9E5DC] dark:border-[#4a3b2f]">
-                <button
-                    type="button"
-                    onClick={() => onDecrease(item.productId)}
-                    className="h-8 w-8 bg-[#F6F4F0] text-base hover:bg-[#E9E5DC] dark:bg-[#332720] dark:hover:bg-[#3d2e22]"
-                >
-                  −
-                </button>
+          <p className="mt-1 text-sm font-semibold text-[#4E2D1D] dark:text-[#e8c9a0]">
+            {(item.price * item.quantity).toLocaleString('ko-KR')}원
+          </p>
 
-                <span className="flex min-w-10 items-center justify-center bg-white text-sm font-semibold dark:bg-[#2b211a]">
-                {item.quantity}
-              </span>
+          {/* 수량 */}
+          <div className="mt-3 flex items-center gap-2">
+            <button
+                type="button"
+                onClick={() => onDecrease(item.productId)}
+                className="
+              flex h-7 w-7 items-center justify-center
+              rounded-md border border-[#E9E5DC]
+              text-[#4E2D1D]
+              transition
+              hover:bg-[#F6F4F0]
+              dark:border-[#4a3b2f]
+              dark:text-[#e8c9a0]
+              dark:hover:bg-[#3d2e22]
+            "
+            >
+              −
+            </button>
 
-                <button
-                    type="button"
-                    onClick={() => onIncrease(item.productId)}
-                    className="h-8 w-8 bg-[#F6F4F0] text-base hover:bg-[#E9E5DC] dark:bg-[#332720] dark:hover:bg-[#3d2e22]"
-                >
-                  +
-                </button>
-              </div>
+            <span className="min-w-5 text-center text-sm font-medium">
+            {item.quantity}
+          </span>
 
-              <button
-                  type="button"
-                  onClick={() => onRemove(item.productId)}
-                  className="rounded-lg border border-[#FECACA] px-3 py-1.5 text-xs font-medium text-[#DC2626] hover:bg-[#FEE2E2] dark:border-[#5c332c] dark:text-[#f0897a]"
-              >
-                삭제
-              </button>
-            </div>
+            <button
+                type="button"
+                onClick={() => onIncrease(item.productId)}
+                className="
+              flex h-7 w-7 items-center justify-center
+              rounded-md border border-[#E9E5DC]
+              text-[#4E2D1D]
+              transition
+              hover:bg-[#F6F4F0]
+              dark:border-[#4a3b2f]
+              dark:text-[#e8c9a0]
+              dark:hover:bg-[#3d2e22]
+            "
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
-  )
+  );
 }
