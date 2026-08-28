@@ -22,7 +22,7 @@ export const getProducts = async (): Promise<ProductResponse[]> => {
 };
 
 export const createProduct = async (
-  data: ProductCreateRequest
+    data: ProductCreateRequest
 ): Promise<ProductResponse> => {
   const res = await fetch(BASE_URL, {
     method: 'POST',
@@ -33,7 +33,8 @@ export const createProduct = async (
   });
 
   if (!res.ok) {
-    throw new Error('상품 등록에 실패했습니다.');
+    const error = await res.json();
+    throw new Error(error.message?.[0] ?? '상품 등록에 실패했습니다.');
   }
 
   return res.json();
@@ -52,7 +53,8 @@ export const updateProduct = async (
   });
 
   if (!res.ok) {
-    throw new Error('상품 수정에 실패했습니다.');
+    const error = await res.json();
+    throw new Error(error.message?.[0] ?? '상품 수정에 실패했습니다.');
   }
 
   return res.json();
