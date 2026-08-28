@@ -1,4 +1,8 @@
-import type { OrderResponse, OrderUpdateRequest } from '@/types/order';
+import type {
+  OrderCreateRequest,
+  OrderResponse,
+  OrderUpdateRequest
+} from '@/types/order';
 
 const BASE_URL = 'http://localhost:8080/orders';
 
@@ -25,6 +29,30 @@ const extractErrorMessage = async (res: Response, defaultMsg: string): Promise<s
     }
   }
   return defaultMsg;
+};
+
+// 주문 생성
+export const createOrder = async (
+    data: OrderCreateRequest
+): Promise<OrderResponse> => {
+  const res = await fetch(BASE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const errorMsg = await extractErrorMessage(
+        res,
+        '주문 생성에 실패했습니다.'
+    );
+
+    throw new Error(errorMsg);
+  }
+
+  return res.json();
 };
 
 // 주문 목록 조회

@@ -1,6 +1,5 @@
 package com.back.project1_team1.order;
 
-import com.back.project1_team1.global.GlobalExceptionHandler;
 import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderItemRequest;

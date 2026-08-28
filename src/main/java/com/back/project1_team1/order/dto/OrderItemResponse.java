@@ -6,6 +6,7 @@ public record OrderItemResponse(
     Long orderItemId,
     Long productId,
     String productName,
+    String imageUrl,
     int unitPrice,
     int quantity,
     int itemTotalPrice
@@ -20,6 +21,7 @@ public record OrderItemResponse(
             orderItem.getId(),
             orderItem.getProduct().getId(),
             orderItem.getProduct().getName(),
+            orderItem.getProduct().getImageUrl(),
             unitPrice,
             quantity,
             unitPrice * quantity

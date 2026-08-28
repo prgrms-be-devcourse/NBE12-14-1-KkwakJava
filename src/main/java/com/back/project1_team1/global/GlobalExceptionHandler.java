@@ -1,5 +1,7 @@
 package com.back.project1_team1.global;
 
+import jakarta.validation.ConstraintViolationException;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -62,6 +64,25 @@ public class GlobalExceptionHandler {
                 "BAD_REQUEST",
                 List.of(e.getMessage())
             ));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+        ConstraintViolationException e){
+
+        List<String> messages = e.getConstraintViolations()
+            .stream()
+            .map(cv -> cv.getMessage())
+            .toList();
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse(
+                400,
+                "BAD_REQUEST",
+                messages
+            ));
+
     }
 
     // 409 CONFLICT: 현재 리소스의 상태와 충돌하여 요청을 수행할 수 없음

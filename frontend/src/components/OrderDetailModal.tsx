@@ -3,37 +3,42 @@
 import React, { useState } from 'react';
 import type { OrderResponse, OrderUpdateRequest } from '@/types/order';
 
-interface Props {
+interface OrderDetailModalProps {
   order: OrderResponse;
+  isDelivered: boolean;
   onClose: () => void;
   onUpdate: (orderId: number, data: OrderUpdateRequest) => Promise<void>;
   onDelete: (orderId: number) => Promise<void>;
 }
 
-export default function OrderDetailModal({ order, onClose, onUpdate, onDelete }: Props) {
+export default function OrderDetailModal({
+                                           order,
+                                           isDelivered,
+                                           onClose,
+                                           onUpdate,
+                                           onDelete,
+                                         }: OrderDetailModalProps) {
+  const [postalCode, setPostalCode] = useState(order.postalCode || '');
+  const [address, setAddress] = useState(order.address || '');
   const [isEditing, setIsEditing] = useState(false);
-  const [address, setAddress] = useState(order.address);
-  const [postalCode, setPostalCode] = useState(order.postalCode);
   const [loading, setLoading] = useState(false);
 
-  const handleUpdate = async () => {
+  const handleSave = async () => {
     if (!postalCode.trim() || !address.trim()) {
       alert('우편번호와 주소를 모두 입력해주세요.');
       return;
     }
-
     try {
       setLoading(true);
-      const updateData: OrderUpdateRequest = {
+      await onUpdate(order.orderId, {
         postalCode,
         address,
-        items: order.items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
-      };
-
-      await onUpdate(order.orderId, updateData);
+        items:
+            order.items?.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+            })) || [],
+      });
       setIsEditing(false);
     } catch (e: any) {
       alert(e.message);
@@ -43,11 +48,10 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete }:
   };
 
   const handleDelete = async () => {
-    if (!confirm(`주문 #${order.orderId}번을 정말 삭제하시겠습니까?`)) return;
+    if (!confirm('정말로 이 주문을 삭제하시겠습니까?')) return;
     try {
       setLoading(true);
       await onDelete(order.orderId);
-      onClose();
     } catch (e: any) {
       alert(e.message);
     } finally {
@@ -67,176 +71,170 @@ export default function OrderDetailModal({ order, onClose, onUpdate, onDelete }:
   };
 
   return (
-      <div style={modalOverlayStyle}>
-        <div style={modalContentStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-            <h3 style={{ margin: 0, fontSize: 18, color: '#2b2523', fontWeight: 700 }}>
-              주문 상세 정보 (#{order.orderId})
-            </h3>
-            <button onClick={onClose} style={closeBtnStyle}>✕</button>
+      <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-50 p-4">
+        <div className="bg-white w-full max-w-[560px] rounded-2xl p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+          {/* 상단 닫기 버튼 */}
+          <button
+              onClick={onClose}
+              className="absolute top-5 right-5 text-neutral-400 hover:text-neutral-700 text-xl font-bold p-1 cursor-pointer transition-colors"
+          >
+            ✕
+          </button>
+
+          {/* 헤더 */}
+          <div className="border-b border-[#eae7e1] pb-4 mb-5">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-[#2b2523]">주문 상세 정보</span>
+              <span className="bg-[#efebe4] text-[#523120] text-xs font-bold px-2 py-0.5 rounded">
+                #{order.orderId}
+              </span>
+              {isDelivered && (
+                  <span className="bg-[#edf7ee] text-[#2e7d32] text-xs font-bold px-2 py-0.5 rounded">
+                  배송 완료
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-[#8c857b] mt-1">주문일자: {formatDate(order.orderDate)}</p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 14, color: '#2b2523', marginBottom: 16 }}>
-            <p style={{ margin: 0 }}><strong>주문 일시:</strong> {formatDate(order.orderDate)}</p>
-            <p style={{ margin: 0 }}><strong>주문자 이메일:</strong> {order.email}</p>
-            <p style={{ margin: 0 }}><strong>총 주문 금액:</strong> {order.totalAmount.toLocaleString()}원</p>
-          </div>
+          {/* 고객 정보 */}
+          <div className="bg-[#f9f8f6] p-4 rounded-xl border border-[#ece8e1] mb-5">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-xs font-bold text-[#523120]">주문자 및 배송지 정보</h3>
+              {isDelivered && (
+                  <span className="text-[11px] font-semibold text-[#8c857b]">
+                ※ 배송 완료된 주문은 배송지를 변경할 수 없습니다.
+              </span>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-y-2.5 text-xs">
+              <span className="text-neutral-500 font-medium">고객 이메일</span>
+              <span className="col-span-2 font-semibold text-[#2b2523]">{order.email}</span>
 
-          <hr style={{ border: 'none', borderTop: '1px solid #ebe7df', margin: '14px 0' }} />
+              <span className="text-neutral-500 font-medium">우편번호</span>
+              <div className="col-span-2">
+                {isEditing ? (
+                    <input
+                        type="text"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded border border-[#d9d4cb] bg-white focus:outline-none focus:border-[#523120]"
+                    />
+                ) : (
+                    <span className="font-semibold text-[#2b2523]">{order.postalCode || '-'}</span>
+                )}
+              </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: 14, color: '#2b2523', fontWeight: 600 }}>배송지 정보</h4>
-            {isEditing ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <input
-                      type="text"
-                      placeholder="우편번호"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      style={inputStyle}
-                  />
-                  <input
-                      type="text"
-                      placeholder="상세주소"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      style={inputStyle}
-                  />
-                </div>
-            ) : (
-                <div style={{ fontSize: 14, color: '#4a443f', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <p style={{ margin: 0 }}>우편번호: {order.postalCode}</p>
-                  <p style={{ margin: 0 }}>주소: {order.address}</p>
+              <span className="text-neutral-500 font-medium">배송 주소</span>
+              <div className="col-span-2">
+                {isEditing ? (
+                    <input
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded border border-[#d9d4cb] bg-white focus:outline-none focus:border-[#523120]"
+                    />
+                ) : (
+                    <span className="font-semibold text-[#2b2523]">{order.address || '-'}</span>
+                )}
+              </div>
+            </div>
+
+            {/* 배송 완료가 아닐 때만 수정 버튼 노출 */}
+            {!isDelivered && (
+                <div className="mt-4 flex justify-end gap-2">
+                  {isEditing ? (
+                      <>
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            className="px-3 py-1.5 text-xs rounded border border-[#dfdad0] bg-white text-[#4a443f] hover:bg-[#f6f4f0] transition-colors cursor-pointer"
+                        >
+                          취소
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="px-3.5 py-1.5 text-xs rounded bg-[#523120] text-white font-semibold hover:bg-[#3d2417] transition-colors disabled:opacity-50 cursor-pointer"
+                        >
+                          {loading ? '저장 중...' : '저장 완료'}
+                        </button>
+                      </>
+                  ) : (
+                      <button
+                          onClick={() => setIsEditing(true)}
+                          className="px-3 py-1.5 text-xs rounded border border-[#dfdad0] bg-white text-[#4a443f] hover:bg-[#f6f4f0] font-medium transition-colors cursor-pointer"
+                      >
+                        배송지 수정
+                      </button>
+                  )}
                 </div>
             )}
           </div>
 
-          <hr style={{ border: 'none', borderTop: '1px solid #ebe7df', margin: '14px 0' }} />
-
-          <div style={{ marginBottom: 24 }}>
-            <h4 style={{ margin: '0 0 10px 0', fontSize: 14, color: '#2b2523', fontWeight: 600 }}>주문 상품 내역</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {order.items.map((item) => (
-                  <li
+          {/* 주문 품목 목록 */}
+          <div className="mb-6">
+            <h3 className="text-xs font-bold text-[#523120] mb-3">주문 상품 목록</h3>
+            <div className="flex flex-col gap-2.5">
+              {order.items?.map((item) => (
+                  <div
                       key={item.orderItemId}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        backgroundColor: '#f9f8f6',
-                        padding: '10px 14px',
-                        borderRadius: 8,
-                        fontSize: 14,
-                        color: '#2b2523',
-                      }}
+                      className="flex items-center justify-between p-3 rounded-lg border border-[#f0ece5] bg-white"
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="flex items-center gap-3">
                       <img
-                          src={item.imageUrl || 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=80&auto=format&fit=crop&q=60'}
-                          alt="상품"
-                          style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', border: '1px solid #eee' }}
+                          src={
+                              item.imageUrl ||
+                              'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=80&auto=format&fit=crop&q=60'
+                          }
+                          alt={item.productName}
+                          className="w-10 h-10 rounded-md object-cover border border-neutral-200"
                       />
                       <div>
-                        <span style={{ fontWeight: 600 }}>{item.productName}</span>
-                        <span style={{ color: '#8c857b', marginLeft: 6, fontSize: 13 }}>
-                      × {item.quantity}개 ({item.unitPrice.toLocaleString()}원)
-                    </span>
+                        <div className="text-xs font-bold text-[#2b2523]">{item.productName}</div>
+                        <div className="text-[11px] text-neutral-500 mt-0.5">
+                          {item.unitPrice.toLocaleString()}원 × {item.quantity}개
+                        </div>
                       </div>
                     </div>
-                    <span style={{ fontWeight: 700, color: '#523120' }}>
-                  {item.itemTotalPrice.toLocaleString()}원
-                </span>
-                  </li>
+                    <div className="text-xs font-bold text-[#523120]">
+                      {(item.unitPrice * item.quantity).toLocaleString()}원
+                    </div>
+                  </div>
               ))}
-            </ul>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            {isEditing ? (
-                <>
-                  <button onClick={() => setIsEditing(false)} style={cancelBtnStyle} disabled={loading}>취소</button>
-                  <button onClick={handleUpdate} style={primaryBtnStyle} disabled={loading}>
-                    {loading ? '저장 중...' : '저장하기'}
+          {/* 총 결제 금액 */}
+          <div className="border-t border-[#eae7e1] pt-4 flex justify-between items-center mb-6">
+            <span className="text-sm font-bold text-[#2b2523]">총 결제 금액</span>
+            <span className="text-base font-extrabold text-[#523120]">
+            {order.totalAmount.toLocaleString()}원
+          </span>
+          </div>
+
+          {/* 모달 하단 버튼 바 */}
+          <div className="flex justify-between items-center">
+            <div>
+              {!isDelivered ? (
+                  <button
+                      onClick={handleDelete}
+                      disabled={loading}
+                      className="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline disabled:opacity-50 cursor-pointer"
+                  >
+                    이 주문 삭제하기
                   </button>
-                </>
-            ) : (
-                <>
-                  <button onClick={handleDelete} style={dangerBtnStyle} disabled={loading}>삭제</button>
-                  <button onClick={() => setIsEditing(true)} style={primaryBtnStyle} disabled={loading}>주소 수정</button>
-                </>
-            )}
+              ) : (
+                  <span className="text-xs text-neutral-400">배송 완료 주문은 삭제할 수 없습니다.</span>
+              )}
+            </div>
+            <button
+                onClick={onClose}
+                className="px-4 py-2 text-xs font-semibold bg-[#eae5dd] hover:bg-[#ded7cc] text-[#2b2523] rounded-lg transition-colors cursor-pointer"
+            >
+              닫기
+            </button>
           </div>
         </div>
       </div>
   );
 }
-
-const modalOverlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.45)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 1000,
-};
-
-const modalContentStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  padding: 24,
-  borderRadius: 12,
-  width: 500,
-  maxWidth: '90%',
-  boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-};
-
-const closeBtnStyle: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  fontSize: 18,
-  cursor: 'pointer',
-  color: '#8c857b',
-};
-
-const inputStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  borderRadius: 6,
-  border: '1px solid #d9d4cb',
-  fontSize: 14,
-  outline: 'none',
-};
-
-const primaryBtnStyle: React.CSSProperties = {
-  backgroundColor: '#4e2d1d',
-  color: '#fff',
-  border: 'none',
-  padding: '8px 16px',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: 13,
-  fontWeight: 600,
-};
-
-const cancelBtnStyle: React.CSSProperties = {
-  backgroundColor: '#ebe7df',
-  color: '#333',
-  border: 'none',
-  padding: '8px 16px',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: 13,
-};
-
-const dangerBtnStyle: React.CSSProperties = {
-  backgroundColor: '#dc2626',
-  color: '#fff',
-  border: 'none',
-  padding: '8px 16px',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: 13,
-  fontWeight: 600,
-};
