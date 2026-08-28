@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 // ==========================================
-// 1. 타입 정의
+// 1. 타입 정의 (기존 types/product.ts)
 // ==========================================
 export interface ProductResponse {
     id: number;
@@ -12,75 +12,63 @@ export interface ProductResponse {
     imageUrl: string;
 }
 
-// ==========================================
-// 2. 임시 (Mock) 데이터 정의
-// ==========================================
-const INITIAL_PRODUCTS: ProductResponse[] = [
-    {
-        id: 1,
-        name: '에티오피아 예가체프 G1',
-        price: 18000,
-        imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=400',
-    },
-    {
-        id: 2,
-        name: '콜롬비아 수프레모',
-        price: 16000,
-        imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=400',
-    },
-    {
-        id: 3,
-        name: '과테말라 안티구아 SHB',
-        price: 17000,
-        imageUrl: 'https://images.unsplash.com/photo-1587734195503-904fca47e0e9?q=80&w=400',
-    },
-    {
-        id: 4,
-        name: '케냐 AA 림부',
-        price: 19500,
-        imageUrl: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=400',
-    },
-    {
-        id: 5,
-        name: '브라질 세라도 세라도',
-        price: 14000,
-        imageUrl: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=400',
-    },
-    {
-        id: 6,
-        name: '코스타리카 타라주',
-        price: 17500,
-        imageUrl: 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?q=80&w=400',
-    },
-    {
-        id: 7,
-        name: '인도네시아 만델링 G1',
-        price: 18500,
-        imageUrl: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?q=80&w=400',
-    },
-    {
-        id: 8,
-        name: '디카페인 콜롬비아',
-        price: 17000,
-        imageUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=400',
-    },
-    {
-        id: 9,
-        name: '시그니처 하우스 블렌드',
-        price: 15000,
-        imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=400',
-    },
-];
+export interface ProductCreateRequest {
+    name: string;
+    price: number;
+    imageUrl: string;
+}
+
+export interface ProductUpdateRequest {
+    name: string;
+    price: number;
+    imageUrl: string;
+}
 
 // ==========================================
-// 3. 메인 통합 컴포넌트 (API 비연동 mock 버전)
+// 2. API 함수 (기존 api/productApi.ts)
+// ==========================================
+const BASE_URL = 'http://localhost:8080/products';
+
+const getProducts = async (): Promise<ProductResponse[]> => {
+    const res = await fetch(BASE_URL);
+    if (!res.ok) throw new Error('상품 목록을 불러오는데 실패했습니다.');
+    return res.json();
+};
+
+const createProduct = async (data: ProductCreateRequest): Promise<ProductResponse> => {
+    const res = await fetch(BASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('상품 등록에 실패했습니다.');
+    return res.json();
+};
+
+const updateProduct = async (id: number, data: ProductUpdateRequest): Promise<ProductResponse> => {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('상품 수정에 실패했습니다.');
+    return res.json();
+};
+
+const deleteProduct = async (id: number): Promise<void> => {
+    const res = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('상품 삭제에 실패했습니다.');
+};
+
+
+// ==========================================
+// 3. 메인 통합 컴포넌트
 // ==========================================
 const ITEMS_PER_PAGE = 8; // 한 페이지당 8개 표기
 
 export default function AdminProductPage() {
     // --- [상태 관리: 공통 & 목록] ---
-    // API 연동 대신 임시 데이터(INITIAL_PRODUCTS)로 초기화
-    const [products, setProducts] = useState<ProductResponse[]>(INITIAL_PRODUCTS);
+    const [products, setProducts] = useState<ProductResponse[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -98,6 +86,20 @@ export default function AdminProductPage() {
 
     // --- [상태 관리: 삭제 모달] ---
     const [deleteTarget, setDeleteTarget] = useState<ProductResponse | null>(null);
+
+    // --- [초기 데이터 로드] ---
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await getProducts();
+                setProducts(data);
+            } catch (err) {
+                console.error(err);
+                alert(err instanceof Error ? err.message : '상품 목록을 불러오는데 실패했습니다.');
+            }
+        };
+        fetchProducts();
+    }, []);
 
     // --- [외부 클릭 시 드롭다운 닫기] ---
     useEffect(() => {
@@ -120,8 +122,8 @@ export default function AdminProductPage() {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const currentProducts = products.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-    // --- [핸들러: 임시 상품 등록] ---
-    const handleCreateSubmit = (e: React.FormEvent) => {
+    // --- [핸들러: 상품 등록] ---
+    const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newName.trim()) {
             alert('상품명을 입력해주세요.');
@@ -137,22 +139,23 @@ export default function AdminProductPage() {
             return;
         }
 
-        // 임시 ID 생성 (현재 최대 ID + 1)
-        const nextId = products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+        try {
+            const product = await createProduct({
+                name: newName.trim(),
+                price: numPrice,
+                imageUrl: newImageUrl.trim(),
+            });
 
-        const newProduct: ProductResponse = {
-            id: nextId,
-            name: newName.trim(),
-            price: numPrice,
-            imageUrl: newImageUrl.trim(),
-        };
-
-        setProducts((prev) => [newProduct, ...prev]);
-        setCurrentPage(1);
-        setNewName('');
-        setNewPrice('');
-        setNewImageUrl('');
-        alert('상품이 등록되었습니다. (임시)');
+            setProducts((prev) => [product, ...prev]);
+            setCurrentPage(1);
+            setNewName('');
+            setNewPrice('');
+            setNewImageUrl('');
+            alert('상품이 등록되었습니다.');
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : '상품 등록 중 오류가 발생했습니다.');
+        }
     };
 
     // --- [핸들러: 수정 모달 열기] ---
@@ -164,8 +167,8 @@ export default function AdminProductPage() {
         setActiveDropdownId(null);
     };
 
-    // --- [핸들러: 임시 상품 수정 저장] ---
-    const handleEditSubmit = (e: React.FormEvent) => {
+    // --- [핸들러: 상품 수정 저장] ---
+    const handleEditSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTarget) return;
 
@@ -178,32 +181,39 @@ export default function AdminProductPage() {
             return;
         }
 
-        const updatedProduct: ProductResponse = {
-            id: editTarget.id,
-            name: editName.trim(),
-            price: Number(editPrice),
-            imageUrl: editImageUrl.trim(),
-        };
+        try {
+            const updatedProduct = await updateProduct(editTarget.id, {
+                name: editName.trim(),
+                price: Number(editPrice),
+                imageUrl: editImageUrl.trim(),
+            });
 
-        setProducts((prev) =>
-            prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-        );
-        setEditTarget(null);
-        alert('상품 정보가 수정되었습니다. (임시)');
+            setProducts((prev) => prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
+            setEditTarget(null);
+            alert('상품 정보가 수정되었습니다.');
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : '상품 수정 중 오류가 발생했습니다.');
+        }
     };
 
-    // --- [핸들러: 임시 상품 삭제 확인] ---
-    const handleConfirmDelete = () => {
+    // --- [핸들러: 상품 삭제 확인] ---
+    const handleConfirmDelete = async () => {
         if (!deleteTarget) return;
+        try {
+            await deleteProduct(deleteTarget.id);
+            const updatedProducts = products.filter((p) => p.id !== deleteTarget.id);
+            setProducts(updatedProducts);
 
-        const updatedProducts = products.filter((p) => p.id !== deleteTarget.id);
-        setProducts(updatedProducts);
-
-        const newTotalPages = Math.ceil(updatedProducts.length / ITEMS_PER_PAGE) || 1;
-        if (currentPage > newTotalPages) {
-            setCurrentPage(newTotalPages);
+            const newTotalPages = Math.ceil(updatedProducts.length / ITEMS_PER_PAGE) || 1;
+            if (currentPage > newTotalPages) {
+                setCurrentPage(newTotalPages);
+            }
+            setDeleteTarget(null);
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : '상품 삭제 중 오류가 발생했습니다.');
         }
-        setDeleteTarget(null);
     };
 
     return (
