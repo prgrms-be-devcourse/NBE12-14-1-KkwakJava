@@ -70,12 +70,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConstraintViolation(
         ConstraintViolationException e){
 
+        List<String> messages = e.getConstraintViolations()
+            .stream()
+            .map(cv -> cv.getMessage())
+            .toList();
+
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse(
                 400,
                 "BAD_REQUEST",
-                List.of(e.getMessage())
+                messages
             ));
 
     }
