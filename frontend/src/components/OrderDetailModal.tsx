@@ -86,16 +86,12 @@ export default function OrderDetailModal({
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-[#2b2523]">주문 상세 정보</span>
               <span className="bg-[#efebe4] text-[#523120] text-xs font-bold px-2 py-0.5 rounded">
-              #{order.orderId}
-            </span>
-              {isDelivered ? (
+                #{order.orderId}
+              </span>
+              {isDelivered && (
                   <span className="bg-[#edf7ee] text-[#2e7d32] text-xs font-bold px-2 py-0.5 rounded">
-                배송 완료
-              </span>
-              ) : (
-                  <span className="bg-[#fcf3e6] text-[#b45309] text-xs font-bold px-2 py-0.5 rounded">
-                배송 준비중
-              </span>
+                  배송 완료
+                </span>
               )}
             </div>
             <p className="text-xs text-[#8c857b] mt-1">주문일자: {formatDate(order.orderDate)}</p>
