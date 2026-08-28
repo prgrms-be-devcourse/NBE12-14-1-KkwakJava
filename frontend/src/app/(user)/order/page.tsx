@@ -15,11 +15,14 @@ import Cart from '@/components/order/Cart';
 import OrderForm from '@/components/order/OrderForm';
 
 import type { OrderCreateRequest } from '@/types/order';
-import type { CartItem, Product } from '@/types/product';
+import type {
+  CartItem,
+  ProductResponse,
+} from '@/types/product';
 
 export default function OrderPage() {
   // DB에서 조회한 상품 목록
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductResponse[]>([]);
 
   // 사용자가 장바구니에 담은 상품
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -67,7 +70,7 @@ export default function OrderPage() {
   }, []);
 
   // 상품을 장바구니에 추가
-  const addToCart = (product: Product) => {
+  const addToCart = (product: ProductResponse) => {
     setCart((currentCart) => {
       const existingItem = currentCart.find(
           (item) => item.productId === product.id

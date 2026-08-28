@@ -1,8 +1,8 @@
-import type { Product } from '@/types/product'
+import type { ProductResponse } from '@/types/product';
 
 interface ProductItemProps {
-  product: Product
-  onAdd: (product: Product) => void
+  product: ProductResponse;
+  onAdd: (product: ProductResponse) => void;
 }
 
 export default function ProductItem({
