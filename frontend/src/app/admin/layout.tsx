@@ -12,59 +12,72 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   return (
-      <div className="min-h-screen w-full bg-[#F6F5F2]">
-        <header className="flex h-16 w-full items-center justify-between border-b border-[#EAE7E1] bg-white px-10">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">☕</span>
-
-            <span className="text-lg font-bold text-[#2B2523]">
+      <div style={{ minHeight: '100vh', backgroundColor: '#f6f5f2' }}>
+        {/* 상단 네비게이션 헤더 */}
+        <header
+            style={{
+              height: 64,
+              backgroundColor: '#ffffff',
+              borderBottom: '1px solid #eae7e1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0 40px',
+            }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 20 }}>☕</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#2b2523' }}>
             Grids & Circles
-          </span>
-
-            <span className="ml-1 text-xs font-semibold text-[#A08D80]">
-            ADMIN
           </span>
           </div>
 
-          <nav className="flex items-center gap-6">
+          <nav style={{ display: 'flex', gap: 24 }}>
+            {/* 배송 관리 (주문 관리 왼쪽 위치) */}
             <Link
                 href="/admin/delivery"
-                className={`pb-1 text-sm font-semibold no-underline ${
-                    pathname.includes('/admin/delivery')
-                        ? 'border-b-2 border-[#523120] text-[#523120]'
-                        : 'text-[#8C857B]'
-                }`}
+                style={{
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: pathname.includes('/admin/delivery') ? '#523120' : '#8c857b',
+                  borderBottom: pathname.includes('/admin/delivery') ? '2px solid #523120' : 'none',
+                  paddingBottom: 4,
+                }}
             >
               배송 관리
             </Link>
-
             <Link
                 href="/admin/orders"
-                className={`pb-1 text-sm font-semibold no-underline ${
-                    pathname.includes('/admin/orders')
-                        ? 'border-b-2 border-[#523120] text-[#523120]'
-                        : 'text-[#8C857B]'
-                }`}
+                style={{
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: pathname.includes('/admin/orders') ? '#523120' : '#8c857b',
+                  borderBottom: pathname.includes('/admin/orders') ? '2px solid #523120' : 'none',
+                  paddingBottom: 4,
+                }}
             >
               주문 관리
             </Link>
-
             <Link
                 href="/admin/product"
-                className={`pb-1 text-sm font-semibold no-underline ${
-                    pathname.includes('/admin/product')
-                        ? 'border-b-2 border-[#523120] text-[#523120]'
-                        : 'text-[#8C857B]'
-                }`}
+                style={{
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: pathname.includes('/admin/product') ? '#523120' : '#8c857b',
+                  borderBottom: pathname.includes('/admin/product') ? '2px solid #523120' : 'none',
+                  paddingBottom: 4,
+                }}
             >
               상품 관리
             </Link>
           </nav>
         </header>
 
-        <main className="w-full">
-          {children}
-        </main>
+        {/* 본문 콘텐츠 영역 */}
+        <main>{children}</main>
       </div>
   );
 }
