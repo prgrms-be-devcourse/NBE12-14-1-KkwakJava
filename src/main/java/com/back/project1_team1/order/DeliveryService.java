@@ -33,63 +33,34 @@ public class DeliveryService {
         List<Order> orders = orderRepository.findAll();
 
         // 주문을 배송 기준일별로 나누기
-        Map<LocalDate, List<Order>> ordersByDeliveryDate =
-            orders.stream()
-                .collect(
-                    Collectors.groupingBy(order -> {
+        Map<LocalDate, List<Order>> ordersByDeliveryDate = orders.stream()
+            .collect(Collectors.groupingBy(order -> {
+                LocalDateTime orderDate = order.getOrderDate();
 
-                        LocalDateTime orderDate =
-                            order.getOrderDate();
+                // 오후 2시 이전 주문 → 해당 날짜 배송 묶음
+                if (orderDate.toLocalTime().isBefore(DELIVERY_CUTOFF_TIME)) {
+                    return orderDate.toLocalDate();
+                }
 
-                        // 오후 2시 이전 주문 → 해당 날짜 배송 묶음
-                        if (
-                            orderDate
-                                .toLocalTime()
-                                .isBefore(DELIVERY_CUTOFF_TIME)
-                        ) {
-                            return orderDate.toLocalDate();
-                        }
+                // 오후 2시 이후 주문 → 다음날 배송 묶음
+                return orderDate.toLocalDate().plusDays(1);
+            }));
 
-                        // 오후 2시 이후 주문 → 다음날 배송 묶음
-                        return orderDate
-                            .toLocalDate()
-                            .plusDays(1);
-                    })
-                );
-
-        List<DeliveryOrderResponse> responses =
-            new ArrayList<>();
+        List<DeliveryOrderResponse> responses = new ArrayList<>();
 
         // 배송일별로 이메일 주문 병합
-        for (
-            Map.Entry<LocalDate, List<Order>> entry :
-            ordersByDeliveryDate.entrySet()
-        ) {
-
-            LocalDate deliveryDate =
-                entry.getKey();
+        for (Map.Entry<LocalDate, List<Order>> entry : ordersByDeliveryDate.entrySet()) {
+            LocalDate deliveryDate = entry.getKey();
 
             // 해당 배송 묶음의 마감 시간
-            LocalDateTime end =
-                deliveryDate.atTime(
-                    DELIVERY_CUTOFF_TIME
-                );
+            LocalDateTime end = deliveryDate.atTime(DELIVERY_CUTOFF_TIME);
 
-            responses.addAll(
-                mergeOrders(
-                    entry.getValue(),
-                    end
-                )
-            );
+            responses.addAll(mergeOrders(entry.getValue(), end));
         }
 
         // 가장 최근 주문일 순으로 정렬
         responses.sort(
-            Comparator
-                .comparing(
-                    DeliveryOrderResponse::getOrderDate
-                )
-                .reversed()
+            Comparator.comparing(DeliveryOrderResponse::getOrderDate).reversed()
         );
 
         return responses;
@@ -102,144 +73,78 @@ public class DeliveryService {
     ) {
 
         // 배송 기준 시간인 14시가 지났으면 배송 완료
-        boolean deliveryCompleted =
-            !LocalDateTime.now().isBefore(end);
+        boolean deliveryCompleted = !LocalDateTime.now().isBefore(end);
 
         // 주문을 최신순 정렬 후 같은 이메일끼리 묶기
-        Map<String, List<Order>> groupedOrders =
-            orders.stream()
-                .sorted(
-                    Comparator
-                        .comparing(
-                            Order::getOrderDate
-                        )
-                        .reversed()
-                )
-                .collect(
-                    Collectors.groupingBy(
-                        Order::getEmail,
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                    )
-                );
+        Map<String, List<Order>> groupedOrders = orders.stream()
+            .sorted(Comparator.comparing(Order::getOrderDate).reversed())
+            .collect(Collectors.groupingBy(
+                Order::getEmail,
+                LinkedHashMap::new,
+                Collectors.toList()
+            ));
 
-        List<DeliveryOrderResponse> responses =
-            new ArrayList<>();
+        List<DeliveryOrderResponse> responses = new ArrayList<>();
 
         // 이메일별 주문 처리
-        for (
-            Map.Entry<String, List<Order>> entry :
-            groupedOrders.entrySet()
-        ) {
-
-            String email =
-                entry.getKey();
-
-            List<Order> emailOrders =
-                entry.getValue();
+        for (Map.Entry<String, List<Order>> entry : groupedOrders.entrySet()) {
+            String email = entry.getKey();
+            List<Order> emailOrders = entry.getValue();
 
             // 최신 주문
-            Order firstOrder =
-                emailOrders.get(0);
-
-            String postalCode =
-                firstOrder.getPostalCode();
-
-            String address =
-                firstOrder.getAddress();
+            Order firstOrder = emailOrders.get(0);
+            String postalCode = firstOrder.getPostalCode();
+            String address = firstOrder.getAddress();
 
             // 같은 이메일 주문에 들어있는 모든 주문상품 펼치기
-            List<OrderItem> orderItems =
-                emailOrders.stream()
-                    .flatMap(
-                        order ->
-                            order
-                                .getOrderItems()
-                                .stream()
-                    )
-                    .toList();
+            List<OrderItem> orderItems = emailOrders.stream()
+                .flatMap(order -> order.getOrderItems().stream())
+                .toList();
 
             // 같은 상품 ID끼리 묶기
-            Map<Long, List<OrderItem>> groupedItems =
-                orderItems.stream()
-                    .collect(
-                        Collectors.groupingBy(
-                            orderItem ->
-                                orderItem
-                                    .getProduct()
-                                    .getId()
-                        )
-                    );
+            Map<Long, List<OrderItem>> groupedItems = orderItems.stream()
+                .collect(Collectors.groupingBy(
+                    orderItem -> orderItem.getProduct().getId()
+                ));
 
-            List<DeliveryItemResponse> deliveryItems =
-                new ArrayList<>();
+            List<DeliveryItemResponse> deliveryItems = new ArrayList<>();
 
             // 같은 상품 수량 합산
-            for (
-                List<OrderItem> sameProductItems :
-                groupedItems.values()
-            ) {
+            for (List<OrderItem> sameProductItems : groupedItems.values()) {
+                OrderItem firstItem = sameProductItems.get(0);
 
-                OrderItem firstItem =
-                    sameProductItems.get(0);
+                int quantity = sameProductItems.stream()
+                    .mapToInt(OrderItem::getQuantity)
+                    .sum();
 
-                int quantity =
-                    sameProductItems.stream()
-                        .mapToInt(
-                            OrderItem::getQuantity
-                        )
-                        .sum();
+                int unitPrice = firstItem.getProduct().getPrice();
+                int itemTotalPrice = unitPrice * quantity;
 
-                int unitPrice =
-                    firstItem
-                        .getProduct()
-                        .getPrice();
-
-                int itemTotalPrice =
-                    unitPrice * quantity;
-
-                deliveryItems.add(
-                    new DeliveryItemResponse(
-                        firstItem
-                            .getProduct()
-                            .getId(),
-
-                        firstItem
-                            .getProduct()
-                            .getName(),
-
-                        firstItem
-                            .getProduct()
-                            .getImageUrl(),
-
-                        unitPrice,
-                        quantity,
-                        itemTotalPrice
-                    )
-                );
+                deliveryItems.add(new DeliveryItemResponse(
+                    firstItem.getProduct().getId(),
+                    firstItem.getProduct().getName(),
+                    firstItem.getProduct().getImageUrl(),
+                    unitPrice,
+                    quantity,
+                    itemTotalPrice
+                ));
             }
 
             // 병합된 배송 전체 금액
-            int totalAmount =
-                deliveryItems.stream()
-                    .mapToInt(
-                        DeliveryItemResponse
-                            ::itemTotalPrice
-                    )
-                    .sum();
+            int totalAmount = deliveryItems.stream()
+                .mapToInt(DeliveryItemResponse::itemTotalPrice)
+                .sum();
 
-            responses.add(
-                new DeliveryOrderResponse(
-                    firstOrder.getId(),
-                    email,
-                    postalCode,
-                    address,
-                    firstOrder.getOrderDate(),
-                    deliveryCompleted,
-                    totalAmount,
-                    deliveryItems
-                )
-            );
+            responses.add(new DeliveryOrderResponse(
+                firstOrder.getId(),
+                email,
+                postalCode,
+                address,
+                firstOrder.getOrderDate(),
+                deliveryCompleted,
+                totalAmount,
+                deliveryItems
+            ));
         }
 
         // 병합된 주문 응답 목록 반환
