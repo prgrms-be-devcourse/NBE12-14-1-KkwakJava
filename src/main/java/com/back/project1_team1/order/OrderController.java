@@ -30,7 +30,8 @@ public class OrderController {
 
     // 주문 목록 및 이메일 조건 조회 (JSON 응답)
     @GetMapping
-    public List<OrderResponse> getOrders(@RequestParam(required = false) @Email String email) {
+    public List<OrderResponse> getOrders(
+        @RequestParam(required = false) @Email(message = "올바른 이메일 형식을 입력해주세요.") String email) {
         return this.orderService.getOrders(email);
     }
 
@@ -43,15 +44,15 @@ public class OrderController {
         OrderResponse response = orderService.createOrder(request);
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+            .status(HttpStatus.CREATED)
+            .body(response);
     }
 
     @PutMapping("/{orderId}")
     public OrderResponse modifyOrder(
         @PathVariable Long orderId,
         @Valid @RequestBody OrderUpdateRequest request) {
-        return this.orderService.modifyOrder(orderId, request );
+        return this.orderService.modifyOrder(orderId, request);
     }
 
     //단건 삭제
