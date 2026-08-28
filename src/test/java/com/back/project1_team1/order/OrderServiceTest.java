@@ -37,10 +37,10 @@ class OrderServiceTest {
     @BeforeEach
     void setUp() {
         // 1. 테스트용 상품 4개 저장
-        Product p1 = productRepository.save(new Product("에티오피아 예가체프", 6000));
-        Product p2 = productRepository.save(new Product("콜롬비아 수프레모", 5000));
-        Product p3 = productRepository.save(new Product("과테말라 안티구아", 5500));
-        Product p4 = productRepository.save(new Product("브라질 세라도", 4500));
+        Product p1 = productRepository.save(new Product("에티오피아 예가체프", 6000, null));
+        Product p2 = productRepository.save(new Product("콜롬비아 수프레모", 5000, null));
+        Product p3 = productRepository.save(new Product("과테말라 안티구아", 5500, null));
+        Product p4 = productRepository.save(new Product("브라질 세라도", 4500, null));
 
         // 2. 10개의 주문자 이메일 목록
         String[] emails = {
@@ -113,7 +113,7 @@ class OrderServiceTest {
     @DisplayName("주문 수정: 배송 마감 전이면 배송지와 상품 목록(수량)이 정상 수정된다")
     void modifyOrder_success() {
         // given
-        Product product = productRepository.save(new Product("새로운 원두", 8000));
+        Product product = productRepository.save(new Product("새로운 원두", 8000, null));
 
         Order order = new Order("modify@test.com", "12345", "기존 주소", LocalDateTime.now());
         order.addOrderItem(product, 1);
@@ -140,7 +140,7 @@ class OrderServiceTest {
     @DisplayName("주문 수정 실패: 이미 배송 마감된 주문은 수정 시 IllegalStateException이 발생한다")
     void modifyOrder_fail_alreadyDelivered() {
         // given: 2일 전 주문 (배송 마감 시간 경과)
-        Product product = productRepository.save(new Product("테스트 원두", 5000));
+        Product product = productRepository.save(new Product("테스트 원두", 5000, null));
         Order order = new Order("delivered@test.com", "12345", "기존 주소", LocalDateTime.now().minusDays(2));
         order.addOrderItem(product, 1);
         Order savedOrder = orderRepository.save(order);
@@ -161,7 +161,7 @@ class OrderServiceTest {
     @DisplayName("주문 수정 실패: 존재하지 않는 주문 ID인 경우 ResourceNotFoundException이 발생한다")
     void modifyOrder_fail_notFound() {
         // given
-        Product product = productRepository.save(new Product("테스트 원두", 5000));
+        Product product = productRepository.save(new Product("테스트 원두", 5000, null));
         OrderUpdateRequest updateRequest = new OrderUpdateRequest(
             "54321",
             "수정된 주소",
