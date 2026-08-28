@@ -68,11 +68,12 @@ export default function ProductList({
                             {/* 1. 이미지 */}
                             <div className="flex w-24 items-center justify-center py-3">
                                 <img
-                                    src={product.imageUrl}
+                                    src={product.imageUrl || 'https://placehold.co/56x56?text=Coffee'}
                                     alt={product.name}
                                     className="h-14 w-14 rounded-lg border border-[#eee] object-cover"
                                     onError={(e) => {
-                                        e.currentTarget.src = 'https://placehold.co/56x56?text=Coffee';
+                                        e.currentTarget.src =
+                                            'https://placehold.co/56x56?text=Coffee';
                                     }}
                                 />
                             </div>

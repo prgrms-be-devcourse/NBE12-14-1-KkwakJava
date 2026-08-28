@@ -21,16 +21,10 @@ public class ProductService {
     @Transactional
     public Product createProduct(ProductCreateRequest request) {
 
-        String imageUrl = request.imageUrl();
-
-        if (imageUrl == null || imageUrl.isBlank()) {
-            imageUrl = "https://placehold.co/56x56?text=Coffee";
-        }
-
         Product product = new Product(
                 request.name(),
                 request.price(),
-                imageUrl
+                request.imageUrl()
         );
 
         return productRepository.save(product);
@@ -62,16 +56,10 @@ public class ProductService {
                                 )
                         );
 
-        String imageUrl = request.imageUrl();
-
-        if (imageUrl == null || imageUrl.isBlank()) {
-            imageUrl = "https://placehold.co/56x56?text=Coffee";
-        }
-
         product.update(
                 request.name(),
                 request.price(),
-                imageUrl
+                request.imageUrl()
         );
 
         return product;
