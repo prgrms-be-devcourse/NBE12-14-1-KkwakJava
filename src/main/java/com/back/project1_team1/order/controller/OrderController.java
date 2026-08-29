@@ -1,5 +1,6 @@
-package com.back.project1_team1.order;
+package com.back.project1_team1.order.controller;
 
+import com.back.project1_team1.order.service.OrderService;
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
 import com.back.project1_team1.order.dto.OrderUpdateRequest;

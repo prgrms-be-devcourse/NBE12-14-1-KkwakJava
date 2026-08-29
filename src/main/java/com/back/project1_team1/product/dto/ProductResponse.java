@@ -1,6 +1,6 @@
 package com.back.project1_team1.product.dto;
 
-import com.back.project1_team1.product.Product;
+import com.back.project1_team1.product.entity.Product;
 
 public record ProductResponse(
         Long id,

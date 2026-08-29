@@ -1,6 +1,8 @@
-package com.back.project1_team1.product;
+package com.back.project1_team1.product.controller;
 
 
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.service.ProductService;
 import com.back.project1_team1.product.dto.ProductCreateRequest;
 import com.back.project1_team1.product.dto.ProductResponse;
 import com.back.project1_team1.product.dto.ProductUpdateRequest;

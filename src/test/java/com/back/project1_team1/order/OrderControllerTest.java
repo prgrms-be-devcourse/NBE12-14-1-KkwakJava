@@ -5,8 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.back.project1_team1.product.Product;
-import com.back.project1_team1.product.ProductRepository;
+import com.back.project1_team1.order.entity.Order;
+import com.back.project1_team1.order.repository.OrderRepository;
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.repository.ProductRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,7 @@ class OrderControllerTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    // ---------- 주문 생성 ----------
     @Test
     @DisplayName("이메일이 비어 있으면 주문 생성 요청은 400을 반환한다")
     void createOrder_emptyEmail_badRequest() throws Exception {

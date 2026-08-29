@@ -1,6 +1,6 @@
 package com.back.project1_team1.order.dto;
 
-import com.back.project1_team1.order.OrderItem;
+import com.back.project1_team1.order.entity.OrderItem;
 
 public record OrderItemResponse(
     Long orderItemId,

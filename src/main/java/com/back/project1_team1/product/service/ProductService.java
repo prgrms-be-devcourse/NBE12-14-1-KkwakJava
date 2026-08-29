@@ -1,6 +1,8 @@
-package com.back.project1_team1.product;
+package com.back.project1_team1.product.service;
 
 import com.back.project1_team1.global.ResourceNotFoundException;
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.repository.ProductRepository;
 import com.back.project1_team1.product.dto.ProductCreateRequest;
 import com.back.project1_team1.product.dto.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;

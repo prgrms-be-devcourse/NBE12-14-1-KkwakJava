@@ -1,6 +1,6 @@
 package com.back.project1_team1.order.dto;
 
-import com.back.project1_team1.order.Order;
+import com.back.project1_team1.order.entity.Order;
 import java.time.LocalDateTime;
 import java.util.List;
 

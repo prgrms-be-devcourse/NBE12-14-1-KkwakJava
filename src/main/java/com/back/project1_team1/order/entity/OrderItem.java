@@ -1,6 +1,6 @@
-package com.back.project1_team1.order;
+package com.back.project1_team1.order.entity;
 
-import com.back.project1_team1.product.Product;
+import com.back.project1_team1.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -1,9 +1,9 @@
 package com.back.project1_team1.global.init;
 
-import com.back.project1_team1.order.Order;
-import com.back.project1_team1.order.OrderRepository;
-import com.back.project1_team1.product.Product;
-import com.back.project1_team1.product.ProductRepository;
+import com.back.project1_team1.order.entity.Order;
+import com.back.project1_team1.order.repository.OrderRepository;
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.repository.ProductRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,7 +24,7 @@ public class DummyDataInit {
     private final OrderRepository orderRepository;
 
     @Bean
-    @Profile("!prod")
+    @Profile("dev")
     public CommandLineRunner initData() {
         return new CommandLineRunner() {
             @Override
