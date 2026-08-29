@@ -4,11 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.back.project1_team1.global.ResourceNotFoundException;
+import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderItemRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
 import com.back.project1_team1.order.dto.OrderUpdateRequest;
-import com.back.project1_team1.product.Product;
-import com.back.project1_team1.product.ProductRepository;
+import com.back.project1_team1.order.entity.Order;
+import com.back.project1_team1.order.entity.OrderItem;
+import com.back.project1_team1.order.repository.OrderItemRepository;
+import com.back.project1_team1.order.repository.OrderRepository;
+import com.back.project1_team1.order.service.OrderService;
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.repository.ProductRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +22,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +35,9 @@ class OrderServiceTest {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
     private ProductRepository productRepository;
@@ -66,20 +74,113 @@ class OrderServiceTest {
         }
     }
 
+    // ---------- 주문 생성 ----------
+    @Test
+    @DisplayName("주문을 생성하면 Order와 OrderItem이 저장된다")
+    void createOrder_success(){
+
+        // given
+        List<Product> products = productRepository.findAll();
+
+        Product product1 = products.get(0);
+        Product product2 = products.get(1);
+
+        long beforeOrderCount = orderRepository.count();
+        long beforeOrderItemCount = orderItemRepository.count();
+
+        OrderCreateRequest request = new OrderCreateRequest(
+            "test@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
+            List.of(
+                new OrderItemRequest(product1.getId(), 2),
+                new OrderItemRequest(product2.getId(), 1)
+            )
+        );
+
+        // when
+        OrderResponse response = orderService.createOrder(request);
+
+        // then
+        assertThat(orderRepository.count()).isEqualTo(beforeOrderCount + 1);
+        assertThat(orderItemRepository.count()).isEqualTo(beforeOrderItemCount + 2);
+
+        assertThat(response.email()).isEqualTo("test@test.com");
+        assertThat(response.postalCode()).isEqualTo("12345");
+        assertThat(response.address()).isEqualTo("서울시 강남구 테스트로 1");
+        assertThat(response.items()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 ID로 주문 생성 시 예외가 발생하고 주문은 저장되지 않는다")
+    void createOrder_invalidProduct_rollback() {
+
+        // given
+        Product product = productRepository.findAll().get(0);
+
+        long beforeOrderCount = orderRepository.count();
+        long beforeOrderItemCount = orderItemRepository.count();
+
+        OrderCreateRequest request = new OrderCreateRequest(
+            "invalid@test.com",
+            "12345",
+            "서울시 테스트구 테스트로 100",
+            List.of(
+                new OrderItemRequest(product.getId(), 2),
+                new OrderItemRequest(999999L, 1)
+            )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(request))
+            .isInstanceOf(ResourceNotFoundException.class)
+            .hasMessageContaining("존재하지 않는 상품입니다");
+
+        assertThat(orderRepository.count()).isEqualTo(beforeOrderCount);
+        assertThat(orderItemRepository.count()).isEqualTo(beforeOrderItemCount);
+    }
+
+    @Test
+    @DisplayName("동일한 상품을 중복하여 주문하면 예외가 발생한다")
+    void createOrder_duplicateProduct_fail() {
+
+        // given
+        Product product = productRepository.findAll().get(0);
+
+        OrderCreateRequest request = new OrderCreateRequest(
+            "test@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
+            List.of(
+                new OrderItemRequest(product.getId(), 2),
+                new OrderItemRequest(product.getId(), 3)
+            )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(request))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("동일한 상품을 중복하여 주문할 수 없습니다.");
+    }
+
+    // ---------- 주문 조회 ----------
     @Test
     @DisplayName("전체 주문 다건 조회: 10건의 주문이 DTO로 정상 반환되며 품목과 총액이 계산된다")
     void findAllOrdersTest() {
+
         // when
         List<OrderResponse> responses = orderService.findAll();
 
         // then
         assertThat(responses).hasSize(10);
 
-        OrderResponse first = responses.get(0);
-        assertThat(first.orderId()).isNotNull();
-        assertThat(first.email()).isNotNull();
-        assertThat(first.items()).hasSize(2);
-        assertThat(first.totalAmount()).isGreaterThan(0);
+        assertThat(responses)
+            .allSatisfy(response -> {
+                assertThat(response.orderId()).isNotNull();
+                assertThat(response.email()).isNotNull();
+                assertThat(response.items()).hasSize(2);
+                assertThat(response.totalAmount()).isGreaterThan(0);
+            });
     }
 
     @Test
@@ -109,6 +210,8 @@ class OrderServiceTest {
         assertThat(responses).hasSize(3);
         assertThat(responses).allMatch(res -> res.email().equals(email));
     }
+
+    // ---------- 주문 수정 ----------
     @Test
     @DisplayName("주문 수정: 배송 마감 전이면 배송지와 상품 목록(수량)이 정상 수정된다")
     void modifyOrder_success() {
@@ -198,4 +301,105 @@ class OrderServiceTest {
         assertThat(blankResult).hasSize(10);
     }
 
+    // ---------- 주문 삭제 ----------
+    @Test
+    @DisplayName("존재하는 주문을 삭제하면 DB에서 사라진다")
+    void deleteOrder_success() {
+
+        // given
+        Product product = productRepository.findAll().get(0);
+
+        Order order = new Order(
+            "delete@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
+            LocalDateTime.now()
+        );
+
+        order.addOrderItem(product, 1);
+
+        Order savedOrder = orderRepository.save(order);
+        Long orderId = savedOrder.getId();
+
+        // when
+        orderService.deleteOrder(orderId);
+
+        // then
+        assertThat(orderRepository.findById(orderId)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id로 삭제 시도하면 예외가 발생한다")
+    void deleteOrder_notFound_throwsException() {
+
+        Long notExistId = 999999L;
+
+        assertThatThrownBy(() -> orderService.deleteOrder(notExistId))
+            .isInstanceOf(ResourceNotFoundException.class)
+            .hasMessageContaining("존재하지 않는 주문입니다");
+    }
+
+    @Test
+    @DisplayName("배송 마감 시간이 지난 주문은 삭제할 수 없다")
+    void deleteOrder_alreadyDelivered_throwsException() {
+
+        Order deliveredOrder = orderRepository.save(new Order(
+            "test@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
+            LocalDateTime.now().minusDays(2)
+        ));
+
+        assertThatThrownBy(() -> orderService.deleteOrder(deliveredOrder.getId()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("이미 배송된 주문이라 삭제할 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("다건 삭제 시 배송 마감 시간이 지난 주문이 포함되어 있으면 전체가 삭제되지 않는다")
+    void deleteOrders_alreadyDelivered_throwsException() {
+
+        // given
+        Product product = productRepository.findAll().get(0);
+
+        Order normalOrder = new Order(
+            "normal@test.com",
+            "12345",
+            "서울시 강남구 테스트로 1",
+            LocalDateTime.now()
+        );
+
+        normalOrder.addOrderItem(product, 1);
+
+        Order savedNormalOrder = orderRepository.save(normalOrder);
+
+        Order deliveredOrder = new Order(
+            "delivered@test.com",
+            "12345",
+            "서울시 강남구 테스트로 2",
+            LocalDateTime.now().minusDays(2)
+        );
+
+        deliveredOrder.addOrderItem(product, 1);
+
+        Order savedDeliveredOrder = orderRepository.save(deliveredOrder);
+
+        // when & then
+        assertThatThrownBy(() ->
+            orderService.deleteOrders(
+                List.of(
+                    savedNormalOrder.getId(),
+                    savedDeliveredOrder.getId()
+                )
+            )
+        )
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("이미 배송된 주문이라 삭제할 수 없습니다");
+
+        assertThat(orderRepository.findById(savedNormalOrder.getId()))
+            .isPresent();
+
+        assertThat(orderRepository.findById(savedDeliveredOrder.getId()))
+            .isPresent();
+    }
 }

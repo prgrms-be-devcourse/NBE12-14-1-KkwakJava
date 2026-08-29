@@ -1,4 +1,4 @@
-package com.back.project1_team1.product;
+package com.back.project1_team1.product.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

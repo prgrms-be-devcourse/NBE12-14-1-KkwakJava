@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import CartItem from './CartItem';
 
-import ConfirmModal from '@/components/common/ConfirmModal';
+import ConfirmModal from '@/components/order/ConfirmModal';
 
 import type { CartItem as CartItemType } from '@/types/product';
 

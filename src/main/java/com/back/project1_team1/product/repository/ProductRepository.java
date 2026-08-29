@@ -1,5 +1,6 @@
-package com.back.project1_team1.product;
+package com.back.project1_team1.product.repository;
 
+import com.back.project1_team1.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { OrderResponse, OrderUpdateRequest } from '@/types/order';
 import { getOrders, updateOrder, deleteOrder, deleteOrders } from '@/api/orderApi';
-import OrderDetailModal from '@/components/OrderDetailModal';
+import OrderDetailModal from '@/components/admin/order/OrderDetailModal';
 
 const ITEMS_PER_PAGE = 10;
 

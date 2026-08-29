@@ -3,8 +3,11 @@ package com.back.project1_team1.order;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.back.project1_team1.order.dto.DeliveryOrderResponse;
-import com.back.project1_team1.product.Product;
-import com.back.project1_team1.product.ProductRepository;
+import com.back.project1_team1.order.entity.Order;
+import com.back.project1_team1.order.repository.OrderRepository;
+import com.back.project1_team1.order.service.DeliveryService;
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.repository.ProductRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

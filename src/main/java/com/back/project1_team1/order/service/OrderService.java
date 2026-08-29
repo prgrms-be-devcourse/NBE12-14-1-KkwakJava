@@ -1,12 +1,14 @@
-package com.back.project1_team1.order;
+package com.back.project1_team1.order.service;
 
 import com.back.project1_team1.global.ResourceNotFoundException;
 import com.back.project1_team1.order.dto.OrderCreateRequest;
 import com.back.project1_team1.order.dto.OrderItemRequest;
 import com.back.project1_team1.order.dto.OrderResponse;
 import com.back.project1_team1.order.dto.OrderUpdateRequest;
-import com.back.project1_team1.product.Product;
-import com.back.project1_team1.product.ProductRepository;
+import com.back.project1_team1.order.entity.Order;
+import com.back.project1_team1.order.repository.OrderRepository;
+import com.back.project1_team1.product.entity.Product;
+import com.back.project1_team1.product.repository.ProductRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

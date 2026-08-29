@@ -1,5 +1,6 @@
-package com.back.project1_team1.order;
+package com.back.project1_team1.order.repository;
 
+import com.back.project1_team1.order.entity.Order;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
