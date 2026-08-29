@@ -21,15 +21,15 @@ public class ProductService {
     @Transactional
     public Product createProduct(ProductCreateRequest request) {
 
+        if (productRepository.existsByName(request.name())) {
+            throw new IllegalArgumentException("이미 존재하는 상품명입니다.");
+        }
+
         Product product = new Product(
                 request.name(),
                 request.price(),
                 request.imageUrl()
         );
-
-        if (productRepository.existsByName(request.name())) {
-            throw new IllegalArgumentException("이미 존재하는 상품명입니다.");
-        }
 
         return productRepository.save(product);
     }
