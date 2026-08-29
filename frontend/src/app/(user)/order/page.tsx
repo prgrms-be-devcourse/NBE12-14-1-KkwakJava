@@ -7,7 +7,7 @@ import { getProducts } from '@/api/productApi';
 
 import { useRouter } from 'next/navigation';
 
-import ConfirmModal from '@/components/common/ConfirmModal';
+import ConfirmModal from '@/components/order/ConfirmModal';
 import OrderSuccessModal from '@/components/order/OrderSuccessModal';
 
 import ProductList from '@/components/order/ProductList';
