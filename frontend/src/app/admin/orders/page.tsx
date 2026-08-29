@@ -45,8 +45,8 @@ function AdminOrdersContent() {
       setOrders(sortedData);
       setSelectedIds([]);
       setCurrentPage(1);
-    } catch (e: any) {
-      alert(e.message);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : '주문 조회에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -102,8 +102,8 @@ function AdminOrdersContent() {
       await deleteOrders(selectedIds);
       alert('선택한 주문들이 삭제되었습니다.');
       fetchOrders(urlEmail);
-    } catch (e: any) {
-      alert(e.message);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : '주문 삭제에 실패했습니다.');
     }
   };
 

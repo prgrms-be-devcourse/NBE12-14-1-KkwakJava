@@ -1,5 +1,6 @@
 package com.back.project1_team1.global;
 
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,10 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(404, response.getBody().status());
         assertEquals("NOT_FOUND", response.getBody().error());
-        assertEquals("존재하지 않는 주문입니다. id = 99", response.getBody().message());
+        assertEquals(
+            List.of("존재하지 않는 주문입니다. id = 99"),
+            response.getBody().message()
+        );
     }
 
     @Test
@@ -43,7 +47,10 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(400, response.getBody().status());
         assertEquals("BAD_REQUEST", response.getBody().error());
-        assertEquals("상품 가격은 0 이상이어야 합니다.", response.getBody().message());
+        assertEquals(
+            List.of("상품 가격은 0 이상이어야 합니다."),
+            response.getBody().message()
+        );
     }
 
     @Test
@@ -61,7 +68,10 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertEquals(409, response.getBody().status());
         assertEquals("CONFLICT", response.getBody().error());
-        assertEquals("이미 배송 완료된 주문은 취소할 수 없습니다.", response.getBody().message());
+        assertEquals(
+            List.of("이미 배송 완료된 주문은 취소할 수 없습니다."),
+            response.getBody().message()
+        );
     }
 
     @Test
@@ -78,6 +88,9 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(500, response.getBody().status());
         assertEquals("INTERNAL_SERVER_ERROR", response.getBody().error());
-        assertEquals("서버 내부 오류가 발생했습니다.", response.getBody().message());
+        assertEquals(
+            List.of("서버 내부 오류가 발생했습니다."),
+            response.getBody().message()
+        );
     }
 }
