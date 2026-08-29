@@ -68,7 +68,7 @@ export default function AdminProductPage() {
 
     return (
         <div className="w-full px-12 py-[50px]">
-            <div className="mx-auto max-w-[1400px]">
+            <div className="mx-auto max-w-[1200px]">
                 <div className="flex items-start gap-9">
                     {/* 등록 폼 */}
                     <ProductCreateForm onCreated={handleCreated} />
