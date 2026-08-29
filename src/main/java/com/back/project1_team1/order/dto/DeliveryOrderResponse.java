@@ -16,7 +16,7 @@ public class DeliveryOrderResponse {
     // 병합된 주문 중 가장 최근 주문일
     private LocalDateTime orderDate;
 
-    // 배송 기준 14시가 지났는지 여부
+    // 배송 기준인 14시가 지났는지 여부
     private boolean deliveryCompleted;
 
     private int totalAmount;

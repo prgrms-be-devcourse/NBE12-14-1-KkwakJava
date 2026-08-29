@@ -15,7 +15,7 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
 
     // [관리자 배송 조회]
-    // 전체 주문을 배송 기준으로 병합하여 조회
+    // 전체 주문을 배송일과 이메일 기준으로 병합하여 조회
     @GetMapping("/merged")
     public List<DeliveryOrderResponse> getDeliveryOrders() {
 

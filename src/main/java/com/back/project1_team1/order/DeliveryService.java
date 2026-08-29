@@ -37,18 +37,18 @@ public class DeliveryService {
             .collect(Collectors.groupingBy(order -> {
                 LocalDateTime orderDate = order.getOrderDate();
 
-                // 오후 2시 이전 주문 → 해당 날짜 배송 묶음
+                // 오후 2시 이전 주문 -> 해당 날짜 배송 묶음
                 if (orderDate.toLocalTime().isBefore(DELIVERY_CUTOFF_TIME)) {
                     return orderDate.toLocalDate();
                 }
 
-                // 오후 2시 이후 주문 → 다음날 배송 묶음
+                // 오후 2시 이후 주문 -> 다음날 배송 묶음
                 return orderDate.toLocalDate().plusDays(1);
             }));
 
         List<DeliveryOrderResponse> responses = new ArrayList<>();
 
-        // 배송일별로 이메일 주문 병합
+        // 배송일별로 이메일 주문 합치기
         for (Map.Entry<LocalDate, List<Order>> entry : ordersByDeliveryDate.entrySet()) {
             LocalDate deliveryDate = entry.getKey();
 
@@ -147,7 +147,7 @@ public class DeliveryService {
             ));
         }
 
-        // 병합된 주문 응답 목록 반환
+        // 병합된 주문 정보들 목록 반환
         return responses;
     }
 }
