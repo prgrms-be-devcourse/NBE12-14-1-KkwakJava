@@ -79,45 +79,48 @@ export default function AdminDeliveryPage() {
   );
 
   return (
-      <div className="min-h-screen w-full bg-[#F6F5F2] px-8 py-8">
+      <div className="max-w-[1200px] mx-auto py-9 px-6">
         {/* ================= 배송 관리 페이지 ================= */}
         <div className="mb-7 flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F6F5F2] text-2xl">🚚</div>
+          <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F6F5F2] text-2xl">
+            🚚
+          </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#2B2523]">배송 관리</h1>
-            <p className="mt-1 text-sm text-[#8C857B]">배송 내역을 확인하세요.</p>
+            <h1 className="text-xl font-bold text-[#2B2523]">배송 관리</h1>
+            <p className="mt-1 text-xs text-[#8C857B]">배송 현황을 확인하고 관리하세요.</p>
           </div>
         </div>
 
         {/* ================ 전체 화면 ================ */}
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
           {/* ================= 왼쪽에 배송 검색칸 ================= */}
-          <aside className="rounded-xl border border-[#E9E5DC] bg-[#FFFFFF] p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-[#2B2523]">배송 검색</h2>
+          {/* 배송 검색 사이드바 */}
+          <aside className="bg-white p-5 rounded-xl border border-[#E9E5DC] shadow-sm">
+            <h2 className="text-sm font-bold text-[#2B2523] mb-4">배송 검색</h2>
 
-            <form onSubmit={handleSearch} className="mt-7">
-              <label className="mb-2 block text-sm font-semibold text-[#2B2523]">이메일</label>
-              <input type="email"
+            <form onSubmit={handleSearch} className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-neutral-600">이메일</label>
+              <input
+                  type="email"
                   value={searchEmail}
                   onChange={(e) => setSearchEmail(e.target.value)}
                   placeholder="이메일을 입력하세요"
-                  className="w-full rounded-lg border border-[#E9E5DC] bg-[#FFFFFF] px-3 py-3 text-sm text-[#2B2523] outline-none placeholder:text-[#AAA39A] focus:border-[#523120]"
+                  className="px-3 py-2 rounded-md border border-[#D9D4CB] text-xs text-[#2B2523] bg-white focus:outline-none focus:border-[#4E2D1D]"
               />
-
-              {/* 조회하기 */}
               <button
                   type="submit"
                   disabled={loading}
-                  className="mt-5 w-full rounded-lg bg-[#4E2D1D] py-3 text-sm font-semibold text-white transition hover:bg-[#523120] disabled:cursor-not-allowed disabled:opacity-60">
+                  className="mt-1.5 bg-[#4E2D1D] hover:bg-[#3B2216] text-white py-2.5 rounded-md font-semibold text-xs transition-colors disabled:opacity-50 cursor-pointer"
+              >
                 {loading ? '조회 중...' : '조회하기'}
               </button>
-
-              {/* 전체 조회 */}
               <button
                   type="button"
                   onClick={handleResetSearch}
                   disabled={loading}
-                  className="mt-2 w-full rounded-lg border border-[#E9E5DC] bg-[#F6F4F0] py-3 text-sm font-semibold text-[#4A443F] transition hover:bg-[#E9E5DC] disabled:cursor-not-allowed disabled:opacity-60">
+                  className="bg-[#F6F4F0] hover:bg-[#EAE5DD] text-[#4A443F] border border-[#DFDAD0] py-2 rounded-md font-semibold text-xs transition-colors disabled:opacity-50 cursor-pointer"
+              >
                 전체 조회
               </button>
             </form>
@@ -126,20 +129,35 @@ export default function AdminDeliveryPage() {
           {/* ================= 오른쪽에 배송내역 칸 ================= */}
           <section className="min-w-0">
             {/* ================= 조회된 배송 | 배송 완료 ================= */}
-            <div className="mb-5 grid grid-cols-2 overflow-hidden rounded-xl border border-[#E9E5DC] bg-[#FFFFFF] shadow-sm">
-              <div className="flex items-center justify-center gap-5 border-r border-[#E9E5DC] py-7">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F6F5F2] text-xl">📦</div>
-                <div>
-                  <p className="text-xs text-[#8C857B]">조회된 배송</p>
-                  <p className="mt-1 text-2xl font-bold text-[#523120]">{orders.length}건</p>
+            <div
+                className="mb-4 rounded-xl border border-[#E9E5DC] bg-[#FFFFFF] p-4 shadow-sm flex items-center justify-around">
+              <div className="flex items-center gap-3.5 flex-1 justify-center">
+                <div
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F5F2] text-lg">
+                  📦
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-[#8C857B]">조회된 배송</span>
+                  <span className="text-lg font-bold text-[#523120]">
+                      {orders.length}
+                    <span className="ml-0.5 text-sm font-semibold">건</span>
+                    </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-5 py-7">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EDF5E9] text-xl font-bold text-green-700">✓</div>
-                <div>
-                  <p className="text-xs text-[#8C857B]">배송 완료</p>
-                  <p className="mt-1 text-2xl font-bold text-green-700">{completedCount}건</p>
+              <div className="h-8 w-[1px] bg-[#E9E5DC]"/>
+
+              <div className="flex items-center gap-3.5 flex-1 justify-center">
+                <div
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EDF5E9] text-lg font-bold text-green-700">
+                  ✓
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-[#8C857B]">배송 완료</span>
+                  <span className="text-lg font-bold text-green-700">
+                      {completedCount}
+                    <span className="ml-0.5 text-sm font-semibold">건</span>
+                    </span>
                 </div>
               </div>
             </div>
@@ -164,15 +182,17 @@ export default function AdminDeliveryPage() {
                   );
 
                   return (
-                      <div key={order.deliveryId} className="overflow-hidden rounded-xl border border-[#E9E5DC] bg-[#FFFFFF]">
+                      <div key={order.deliveryId}
+                           className="overflow-hidden rounded-xl border border-[#E9E5DC] bg-[#FFFFFF]">
 
                         {/* ================= 배송 내역란에 주문한 1건 상단바 ================= */}
-                        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E9E5DC] bg-[#F6F5F2] px-5 py-4">
+                        <div
+                            className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E9E5DC] bg-[#F6F5F2] px-5 py-4">
                           <div className="flex flex-wrap items-center gap-4">
                             <strong className="text-sm text-[#2B2523]">
                               주문번호 #{String(order.deliveryId).padStart(3, '0')}
                             </strong>
-                            <div className="h-4 w-px bg-[#E9E5DC]" />
+                            <div className="h-4 w-px bg-[#E9E5DC]"/>
                             <span className="text-xs text-[#8C857B]">마지막 주문일</span>
                             <span className="text-sm font-semibold text-[#2B2523]">
                               {formatOrderDate(order.orderDate)}
@@ -180,12 +200,14 @@ export default function AdminDeliveryPage() {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            {order.deliveryCompleted && (<span className="rounded-md border border-[#CFE1C8] bg-[#EDF5E9] px-3 py-1 text-xs font-bold text-green-700">
+                            {order.deliveryCompleted && (<span
+                                    className="rounded-md border border-[#CFE1C8] bg-[#EDF5E9] px-3 py-1 text-xs font-bold text-green-700">
                               배송 완료
                             </span>
                             )}
 
-                            <button type="button" onClick={() => handleOrderDetails(order.email)} className="rounded-md border border-[#E9E5DC] bg-[#F6F4F0] px-3 py-1 text-xs font-semibold text-[#4A443F] transition hover:bg-[#E9E5DC]">
+                            <button type="button" onClick={() => handleOrderDetails(order.email)}
+                                    className="rounded-md border border-[#E9E5DC] bg-[#F6F4F0] px-3 py-1 text-xs font-semibold text-[#4A443F] transition hover:bg-[#E9E5DC]">
                               주문 내역
                             </button>
                           </div>
@@ -194,7 +216,8 @@ export default function AdminDeliveryPage() {
                         {/* ================= 배송 내역란에 주문 1건당 내부정보 ================= */}
                         <div className="grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
                           {/* 고객 정보 */}
-                          <div className="border-b border-[#E9E5DC] p-5 xl:border-b-0 xl:border-r">
+                          <div
+                              className="border-b border-[#E9E5DC] p-5 xl:border-b-0 xl:border-r">
                             <div className="flex flex-col gap-5">
                               <div>
                                 <p className="text-xs text-[#8C857B]">이메일</p>
@@ -210,7 +233,8 @@ export default function AdminDeliveryPage() {
 
                           {/* 주문한 상품 정보 */}
                           <div className="min-w-0 p-5">
-                            <div className="grid grid-cols-[minmax(0,1fr)_90px_120px] border-b border-[#E9E5DC] pb-3 text-xs font-bold text-[#2B2523]">
+                            <div
+                                className="grid grid-cols-[minmax(0,1fr)_90px_120px] border-b border-[#E9E5DC] pb-3 text-xs font-bold text-[#2B2523]">
                               <span>주문 상품</span>
                               <span className="text-right">수량</span>
                               <span className="text-right">가격</span>
@@ -218,32 +242,41 @@ export default function AdminDeliveryPage() {
 
                             <div className="divide-y divide-[#E9E5DC]">
                               {order.items.map((item) => (
-                                  <div key={item.productId} className="grid grid-cols-[minmax(0,1fr)_90px_120px] items-center py-4">
+                                  <div key={item.productId}
+                                       className="grid grid-cols-[minmax(0,1fr)_90px_120px] items-center py-4">
                                     <div className="flex min-w-0 items-center gap-3">
-                                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#F6F5F2]">
+                                      <div
+                                          className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#F6F5F2]">
                                         {item.imageUrl ? (
-                                            <img src={item.imageUrl} alt={item.productName} className="h-full w-full object-cover" />
+                                            <img src={item.imageUrl} alt={item.productName}
+                                                 className="h-full w-full object-cover"/>
                                         ) : (
-                                            <div className="flex h-full w-full items-center justify-center">☕</div>
+                                            <div
+                                                className="flex h-full w-full items-center justify-center">☕</div>
                                         )}
                                       </div>
                                       <p className="min-w-0 truncate text-sm font-medium text-[#2B2523]">{item.productName}</p>
                                     </div>
-                                    <span className="text-right text-sm font-semibold text-[#2B2523]">{item.quantity}개</span>
-                                    <span className="text-right text-sm font-semibold text-[#2B2523]">{item.itemTotalPrice.toLocaleString()}원</span>
+                                    <span
+                                        className="text-right text-sm font-semibold text-[#2B2523]">{item.quantity}개</span>
+                                    <span
+                                        className="text-right text-sm font-semibold text-[#2B2523]">{item.itemTotalPrice.toLocaleString()}원</span>
                                   </div>
                               ))}
                             </div>
 
                             {/*  합계(총 수량, 금액) */}
-                            <div className="flex flex-wrap items-center justify-end gap-8 border-t border-[#E9E5DC] pt-4">
+                            <div
+                                className="flex flex-wrap items-center justify-end gap-8 border-t border-[#E9E5DC] pt-4">
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-[#8C857B]">총 수량</span>
-                                <strong className="text-sm text-[#2B2523]">{orderTotalQuantity}개</strong>
+                                <strong
+                                    className="text-sm text-[#2B2523]">{orderTotalQuantity}개</strong>
                               </div>
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-[#8C857B]">총 금액</span>
-                                <strong className="text-base text-[#523120]">{order.totalAmount.toLocaleString()}원</strong>
+                                <strong
+                                    className="text-base text-[#523120]">{order.totalAmount.toLocaleString()}원</strong>
                               </div>
                             </div>
                           </div>
