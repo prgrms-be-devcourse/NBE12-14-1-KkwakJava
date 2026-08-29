@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { getProducts, updateProduct, deleteProduct } from '@/api/productApi';
 import type { ProductResponse, ProductUpdateRequest } from '@/types/product';
 
-import ProductCreateForm from '@/components/product/ProductCreateForm';
-import ProductList from '@/components/product/ProductList';
-import ProductEditModal from '@/components/product/ProductEditModal';
-import ProductDeleteModal from '@/components/product/ProductDeleteModal';
+import ProductCreateForm from '@/components/admin/product/ProductCreateForm';
+import ProductList from '@/components/admin/product/ProductList';
+import ProductEditModal from '@/components/admin/product/ProductEditModal';
+import ProductDeleteModal from '@/components/admin/product/ProductDeleteModal';
 
 const ITEMS_PER_PAGE = 8;
 
