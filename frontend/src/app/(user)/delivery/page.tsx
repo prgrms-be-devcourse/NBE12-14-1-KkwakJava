@@ -342,7 +342,7 @@ export default function DeliveryPage() {
             </svg>
           </span>
           <div>
-            <h1 className="text-2xl font-bold">배송 조회</h1>
+            <h1 className="text-2xl font-bold">주문·배송 조회</h1>
             <p className="text-sm text-[#8a7d70]">이메일로 주문 내역과 배송 상태를 확인하세요.</p>
           </div>
         </div>
