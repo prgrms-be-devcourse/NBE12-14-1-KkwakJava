@@ -78,7 +78,7 @@ export default function AdminProductPage() {
                         <div>
                             <div className="mb-6 flex items-center gap-3">
                                 <span className="text-xl font-bold text-[#2b2523]">
-                                    등록된 원두 상품
+                                    등록된 카페 상품
                                 </span>
                                 <span className="rounded-md border border-[#e9e5dc] bg-[#f6f4f0] px-3 py-1 text-sm font-semibold text-[#6d665e]">
                                     총 {products.length}건
