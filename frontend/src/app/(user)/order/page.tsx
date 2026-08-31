@@ -289,11 +289,11 @@ export default function OrderPage() {
 
               <div>
                 <h1 className="text-2xl font-bold">
-                  원두 주문
+                  카페 메뉴 주문
                 </h1>
 
                 <p className="text-sm text-[#8a7d70]">
-                  원하는 원두를 선택하고 배송 정보를 입력해 주세요.
+                  원하는 상품을 선택하고 배송 정보를 입력해 주세요.
                 </p>
               </div>
             </div>
@@ -361,7 +361,7 @@ export default function OrderPage() {
         <ConfirmModal
             isOpen={isOrderConfirmOpen}
             title="주문 확인"
-            message={`총 ${totalAmount.toLocaleString('ko-KR')}원을 주문하시겠습니까?`}
+            message={`총 ${cart.length}개의 상품을 주문하시겠습니까?`}
             confirmText="주문"
             variant="primary"
             isProcessing={isSubmitting}

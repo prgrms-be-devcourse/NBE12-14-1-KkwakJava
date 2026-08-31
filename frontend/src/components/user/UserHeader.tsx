@@ -44,7 +44,7 @@ export default function UserHeader() {
                     : 'text-[#8a7d70] hover:text-[#2b2420] dark:hover:text-[#f3e9dc]'
               }
           >
-            배송 조회
+            주문·배송 조회
           </Link>
         </nav>
       </header>
