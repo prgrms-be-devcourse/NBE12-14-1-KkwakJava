@@ -40,9 +40,9 @@ out/
 db_dev.mv.db
 db_dev.trace.db
 src/main/resources/application-local.yml
+.DS_Store
+**/.DS_Store
 
 ### Postman ###
 .postman/
 
-.DS_Store
-**/.DS_Store
